@@ -13,6 +13,7 @@ go_library(
     ],
 )
 
+# gazelle:ignore
 go_binary(
     name = "helloworld",
     embed = [

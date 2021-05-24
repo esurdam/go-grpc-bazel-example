@@ -1,4 +1,4 @@
-// Program main is the entrpoint to our helloworld GreeterServer
+// Program main is the entrypoint to our helloworld GreeterServer
 package main
 
 import (
