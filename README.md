@@ -9,6 +9,7 @@ implementation can be included in `services/{{.packageName}}/pkg/`.
 
 In this case, `helloworld` will be implemented in `pkg`.
 
+- [Create new service](#create-a-new-service)
 - [Generating BUILD.bazel files](#generating-build-files)
 - [Generating proto files](#generating-proto-files-(development))
 - [Test locally](#test-repo)
@@ -31,6 +32,40 @@ tools       # tool versioning
 `Go` and `Bazel` are the only two requirements.
 
 [Install Bazel](https://docs.bazel.build/versions/master/install.html)
+
+## Create a new service
+
+Create proto file and define types/service.
+```bash
+    touch pb/helloworld/helloworld.proto
+    # Add definitions to file
+```
+
+Generate `BUILD.bazel` files which contain proto and library definitions, then run `make link` to add
+the generated files locally.
+```bash
+make gazelle
+make link
+```
+
+Implement proto service in `pkg`
+```bash
+    mkdir pkg/helloworld/server
+    touch pkg/helloworld/server/server.go
+```
+
+Create service entrypoint in `services`
+```bash
+    mkdir services/helloworld
+    touch services/helloworld/main.go
+```
+
+Define kubernetes service in `ci/services`
+```bash
+touch ci/services/helloworld.yml
+```
+
+Lastly, add the service definition to aggregate rule in `BUILD`.
 
 ## Generating BUILD files
 
@@ -160,3 +195,4 @@ bazel run \
   --cpu=k8 \
   //services/helloworld:push
 ```
+
