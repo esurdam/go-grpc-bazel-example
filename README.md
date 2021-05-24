@@ -9,7 +9,7 @@ In this case, `helloworld` will be implemented in `pkg`.
 
 - [Generating BUILD.bazel files](#generating-build-files)
 - [Generating proto files](#generating-proto-files-(development))
-- [Test locally](#test-service-locally)
+- [Test locally](#test-repo)
 - [Running locally](#running-service-locally)
 - [Deployment](#deployment)
 
