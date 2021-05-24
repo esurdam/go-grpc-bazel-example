@@ -6,7 +6,7 @@ go_library(
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
-        "//pb/helloworld",
+        "//pb/helloworld:helloworld_gateway_lib_proto",
         "//pkg/helloworld/server",
         "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
         "@org_golang_google_grpc//:go_default_library",

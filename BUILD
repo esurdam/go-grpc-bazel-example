@@ -3,6 +3,7 @@ package(default_visibility = ["@//visibility:public"])
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle_binary")
 
+# gazelle:resolve go github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld //pb/helloworld:helloworld_gateway_lib_proto
 # gazelle:resolve go github.com/grpc-ecosystem/grpc-gateway/v2/runtime @grpc_ecosystem_grpc_gateway//runtime:go_default_library
 
 gazelle_binary(
