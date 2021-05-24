@@ -74,6 +74,17 @@ Tests can also be aggregated into test groups to be tested at once.
 bazel run //services/helloworld:helloworld
 ```
 
+Then we use cURL to send HTTP requests:
+
+```bash
+curl -X POST -k http://localhost:8090/v1/greeter -d '{"name": "TestName"}'
+```
+```json
+{"message":"Hello TestName!"}
+```
+
+You can view the swagger at [http://localhost:8090/swagger.json](http://localhost:8090/swagger.json)
+
 ## Deployment
 
 CI checks for formatting; ensure formatting with `make fmt`
