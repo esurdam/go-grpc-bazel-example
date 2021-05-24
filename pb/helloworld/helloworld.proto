@@ -4,10 +4,16 @@ option go_package = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld";
 
 package helloworld;
 
+import "google/api/annotations.proto";
+
 // The greeting service definition.
 service Greeter {
     // Sends a greeting
-    rpc SayHello (HelloRequest) returns (HelloReply) {}
+    rpc SayHello (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+          get: "/v1/greeter"
+        };
+    }
 }
 
 // The request message containing the user's name.

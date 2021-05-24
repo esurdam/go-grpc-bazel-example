@@ -9,7 +9,9 @@ import (
 )
 
 // Server implements pb.GreeterServer
-type Server struct{}
+type Server struct{
+	pb.UnimplementedGreeterServer
+}
 
 // SayHello implements pb.GreeterServer
 func (s *Server) SayHello(ctx context.Context, req *pb.HelloRequest) (*pb.HelloReply, error) {

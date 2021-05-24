@@ -1,19 +1,20 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
-    name = "go_default_library",
+    name = "helloworld_lib",
     srcs = ["main.go"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
-        "//pb/helloworld:go_default_library",
-        "//pkg/helloworld/server:go_default_library",
+        "//pb/helloworld",
+        "//pkg/helloworld/server",
+        "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
     ],
 )
 
 go_binary(
     name = "helloworld",
-    embed = [":go_default_library"],
+    embed = [":helloworld_lib"],
     visibility = ["//visibility:public"],
 )
