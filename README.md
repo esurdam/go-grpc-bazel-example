@@ -1,6 +1,6 @@
 # go-grpc-bazel-example
 
-This repo is an example monorepo which utilized grpc+bazel.
+This repo is an example monorepo which utilizes grpc+bazel.
 
 If proto implementation will be shared across services, implementation should reside in `pkg/`. Otherwise,
 implementation can be included in `services/{{.packageName}}/pkg/`.
@@ -23,6 +23,12 @@ pkg         # contains proto implementations
 services    # entrypoints for kubernetes defined microservices
 tools       # tool versioning
 ```
+
+## Requirements
+
+`Go` and `Bazel` are the only two requirements.
+
+[Install Bazel](https://docs.bazel.build/versions/master/install.html)
 
 ## Generating BUILD files
 
