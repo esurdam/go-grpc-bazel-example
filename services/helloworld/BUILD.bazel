@@ -44,6 +44,7 @@ go_image(
         "-s",
         "-w",
     ],
+    visibility = ["//visibility:public"],
 )
 
 docker_push(

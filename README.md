@@ -120,7 +120,7 @@ make fmt
 
 Each service should contain a `k8s_deploy` rule, which defines the cluster deployment.
 
-This rule build the binary in Docker, pushes the image to the container registry, 
+This rule builds the binary in Docker, pushes the image to the container registry, 
 and deploys the service to the defined Kubernetes cluster. 
 
 ```
@@ -133,11 +133,11 @@ k8s_deploy(
 )
 ```
 
-Each service is expected to have an exported yaml file for configuration exposed in the ci directory.
+Each service is expected to have an exported yaml file for configuration exposed in the `ci/services` directory.
 
 ### Pushing service to container registry
 
-Use to deploy to container registry individually.
+Used to deploy a service to the container registry.
 
 Each service should contain a `docker_push` rule, which defines the container registry and path.
 
