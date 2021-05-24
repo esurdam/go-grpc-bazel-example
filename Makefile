@@ -1,9 +1,9 @@
-.PHONY: build clean gazelle link fmt
+.PHONY: build clean gazelle link fmt test
 
 .DEFAULT_GOAL = build
 
 build:
-	make clean
+	make test
 
 fmt:
 	bash ci/build-fmt.sh
@@ -15,4 +15,7 @@ gazelle:
 
 link:
 	bazel run //pb/helloworld:helloworld_go_proto_link
+
+test:
+	bash ci/test.sh
 

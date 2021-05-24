@@ -7,8 +7,11 @@ implementation can be included in `services/{{.packageName}}/pkg/`.
 
 In this case, `helloworld` will be implemented in `pkg`.
 
-(Running locally)[#running-locally]
-(Deployment)[#deployment]
+- [Generating BUILD.bazel files](#generating-build-files)
+- [Generating proto files](#generating-proto-files-(development))
+- [Test locally](#test-service-locally)
+- [Running locally](#running-service-locally)
+- [Deployment](#deployment)
 
 ## Layout
 
@@ -23,7 +26,7 @@ tools       # tool versioning
 
 ## Generating BUILD files
 
-Run `make gazelle` to generate/update BUILD files.
+Run `make gazelle` to generate/update BUILD files (which include test and binaries).
 
 This also updates the WORKSPACE with required deps.
 
@@ -40,6 +43,24 @@ Otherwise, Bazel will handle generating the pb file during build.
 ```bash
 bazel run //pb/helloworld:helloworld_go_proto_link
 ```
+
+## Test repo
+
+To run all tests:
+```bash
+make test
+```
+
+Test individual package:
+```bash
+bazel test --features race \
+  --verbose_failures \
+  --test_output=errors \
+  --action_env=CI=true \
+  //pkg/helloworld/server:go_default_test
+```
+
+Tests can also be aggregated into test groups to be tested at once.
 
 ## Running service locally
 
