@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_embed_data")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_embed_data", "go_library")
 
 go_library(
     name = "helloworld_lib",
@@ -15,7 +15,10 @@ go_library(
 
 go_binary(
     name = "helloworld",
-    embed = [":helloworld_lib", ":static_assets"],
+    embed = [
+        ":helloworld_lib",
+        ":static_assets",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -23,6 +26,6 @@ go_binary(
 # Embeds the swagger json as var "Data"
 go_embed_data(
     name = "static_assets",
+    src = "//pb/helloworld:helloworld_gateway_grpc",
     package = "main",
-    src = "//pb/helloworld:helloworld_gateway_grpc"
 )
