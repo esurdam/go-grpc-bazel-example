@@ -16,6 +16,8 @@ In this case, `helloworld` will be implemented in `pkg`.
 - [Running locally](#running-service-locally)
 - [Deployment](#deployment)
 
+- [Useful Links/Resources](#useful-links)
+
 ## Layout
 
 ```
@@ -195,3 +197,13 @@ bazel run \
   //services/helloworld:push
 ```
 
+## Useful Links
+
+GRPC
+- [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
+
+Bazelbuild rules
+- [rules_docker](https://github.com/bazelbuild/rules_docker)
+- [rules_go](https://github.com/bazelbuild/rules_go)
+- [rules_k8s](https://github.com/bazelbuild/rules_k8s)
+- [rules_proto](https://github.com/bazelbuild/rules_proto)
