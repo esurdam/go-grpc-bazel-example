@@ -146,7 +146,7 @@ docker_push(
     name = "push",
     image = ":docker",
     registry = "ghcr.io",
-    repository = "adgreetz/go-grpc-bazel-example",
+    repository = "adgreetz/go-grpc-bazel-example/services/helloworld",
     tag = "$(version)",
 )
 ```
