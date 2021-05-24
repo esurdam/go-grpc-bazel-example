@@ -3,7 +3,7 @@
 .DEFAULT_GOAL = build
 
 build:
-	make test
+	bash ci/build-service.sh
 
 fmt:
 	bash ci/build-fmt.sh
