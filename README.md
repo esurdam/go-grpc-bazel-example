@@ -37,8 +37,7 @@ tools       # tool versioning
 
 Create proto file and define types/service.
 ```bash
-    touch pb/helloworld/helloworld.proto
-    # Add definitions to file
+touch pb/helloworld/helloworld.proto # Add definitions to this file
 ```
 
 Generate `BUILD.bazel` files which contain proto and library definitions, then run `make link` to add
@@ -50,14 +49,14 @@ make link
 
 Implement proto service in `pkg`
 ```bash
-    mkdir pkg/helloworld/server
-    touch pkg/helloworld/server/server.go
+mkdir pkg/helloworld/server
+touch pkg/helloworld/server/server.go
 ```
 
 Create service entrypoint in `services`
 ```bash
-    mkdir services/helloworld
-    touch services/helloworld/main.go
+mkdir services/helloworld
+touch services/helloworld/main.go
 ```
 
 Define kubernetes service in `ci/services`
