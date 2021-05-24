@@ -30,3 +30,36 @@ go_embed_data(
     src = "//pb/helloworld:helloworld_gateway_grpc",
     package = "main",
 )
+
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
+
+go_image(
+    name = "docker",
+    embed = [
+        ":helloworld_lib",
+        ":static_assets",
+    ],
+    gc_linkopts = [
+        "-s",
+        "-w",
+    ],
+)
+
+docker_push(
+    name = "push",
+    image = ":docker",
+    registry = "ghcr.io",
+    repository = "adgreetz/go-grpc-bazel-example",
+    tag = "$(version)",
+)
+
+load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
+
+k8s_deploy(
+    name = "k8s",
+    images = {
+        "services/helloworld:latest": "//services/helloworld:docker",
+    },
+    template = "//ci/services:helloworld.yaml",
+)

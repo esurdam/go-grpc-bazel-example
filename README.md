@@ -87,10 +87,76 @@ curl -X POST -k http://localhost:8090/v1/greeter -d '{"name": "TestName"}'
 
 You can view the swagger at [http://localhost:8090/swagger.json](http://localhost:8090/swagger.json)
 
+### Running with Docker locally
+
+Each service should contain a `docker` rule, which builds the binary in a docker image:
+
+```
+go_image(
+    name = "docker",
+    embed = [
+        ":helloworld_lib",
+    ],
+)
+```
+To run the binary in docker:
+
+```bash
+bazel run \
+  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+  --cpu=k8 \
+  //services/helloworld:docker
+```
+
 ## Deployment
 
 CI checks for formatting; ensure formatting with `make fmt`
 
 ```bash
 make fmt
+```
+
+### Kubernetes deployment
+
+Each service should contain a `k8s_deploy` rule, which defines the cluster deployment.
+
+This rule build the binary in Docker, pushes the image to the container registry, 
+and deploys the service to the defined Kubernetes cluster. 
+
+```
+k8s_deploy(
+    name = "k8s",
+    images = {
+        "services/helloworld:latest": "//services/helloworld:docker",
+    },
+    template = "//ci/services:helloworld.yaml",
+)
+```
+
+Each service is expected to have an exported yaml file for configuration exposed in the ci directory.
+
+### Pushing service to container registry
+
+Use to deploy to container registry individually.
+
+Each service should contain a `docker_push` rule, which defines the container registry and path.
+
+```
+docker_push(
+    name = "push",
+    image = ":docker",
+    registry = "ghcr.io",
+    repository = "adgreetz/go-grpc-bazel-example",
+    tag = "$(version)",
+)
+```
+
+To push an individual service (where version is the container label):
+
+```bash
+bazel run \
+  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \ 
+  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+  --cpu=k8 \
+  //services/helloworld:push
 ```
