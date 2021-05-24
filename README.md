@@ -1,5 +1,7 @@
 # go-grpc-bazel-example
 
+[![test](https://github.com/AdGreetz/go-grpc-bazel-example/actions/workflows/go.yml/badge.svg)](https://github.com/AdGreetz/go-grpc-bazel-example/actions/workflows/go.yml)
+
 This repo is an example monorepo which utilizes grpc+bazel.
 
 If proto implementation will be shared across services, implementation should reside in `pkg/`. Otherwise,
