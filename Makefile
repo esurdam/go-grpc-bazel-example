@@ -1,9 +1,12 @@
-.PHONY: build clean gazelle link fmt test
+.PHONY: build clean gazelle link fmt test coverage
 
 .DEFAULT_GOAL = build
 
 build:
 	bash ci/build-service.sh
+
+coverage:
+	bash ci/coverage.sh
 
 fmt:
 	bash ci/build-fmt.sh

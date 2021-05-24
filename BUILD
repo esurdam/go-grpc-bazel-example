@@ -18,3 +18,8 @@ gazelle(
     external = "external",
     gazelle = "//:gazelle_binary",
 )
+
+filegroup(
+    name = "coverage_files",
+    srcs = glob(["bazel-out/**/coverage.dat"]),
+)
