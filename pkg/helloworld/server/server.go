@@ -9,7 +9,7 @@ import (
 )
 
 // Server implements pb.GreeterServer
-type Server struct{
+type Server struct {
 	pb.UnimplementedGreeterServer
 }
 

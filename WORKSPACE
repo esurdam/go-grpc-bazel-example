@@ -194,6 +194,10 @@ http_archive(
     urls = ["https://github.com/nikunjy/golink/archive/v1.0.0.tar.gz"],
 )
 
+load("@io_bazel_rules_go//extras:embed_data_deps.bzl", "go_embed_data_dependencies")
+
+go_embed_data_dependencies()
+
 # DEPS
 
 go_repository(

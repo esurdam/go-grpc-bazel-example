@@ -9,14 +9,14 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
 	"github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
 var (
-	port = flag.Int("port", 10000, "grpc port to listen on")
+	port     = flag.Int("port", 10000, "grpc port to listen on")
 	httpPort = flag.Int("http-port", 8090, "http port to listen on (serve json API)")
 )
 
@@ -55,9 +55,14 @@ func main() {
 		log.Fatalln("Failed to register gateway:", err)
 	}
 
+	mux := http.NewServeMux()
+	mux.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(Data)
+	})
+	mux.Handle("/", gwmux)
 	gwServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *httpPort),
-		Handler: gwmux,
+		Handler: mux,
 	}
 
 	log.Printf("Serving gRPC-Gateway on http://0.0.0.0:%d", *httpPort)

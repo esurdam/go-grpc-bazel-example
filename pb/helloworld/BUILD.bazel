@@ -34,7 +34,7 @@ go_proto_link(
 
 # Manually defined
 
-load("@rules_proto_grpc//grpc-gateway:defs.bzl", "gateway_grpc_compile", "gateway_grpc_library")
+load("@rules_proto_grpc//grpc-gateway:defs.bzl", "gateway_grpc_compile", "gateway_grpc_library", "gateway_openapiv2_compile")
 
 gateway_grpc_compile(
     name = "helloworld_gateway_proto",
@@ -43,7 +43,13 @@ gateway_grpc_compile(
 
 gateway_grpc_library(
     name = "helloworld_gateway_lib_proto",
-    visibility = ["//visibility:public"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
     protos = [":helloworld_proto"],
+    visibility = ["//visibility:public"],
+)
+
+gateway_openapiv2_compile(
+    name = "helloworld_gateway_grpc",
+    protos = [":helloworld_proto"],
+    visibility = ["//visibility:public"],
 )
