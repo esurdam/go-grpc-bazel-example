@@ -94,13 +94,11 @@ BUILD.bazel files located in pb directory will contain grpc rules.
 
 ## Generating proto files (development)
 
-Run `*_go_proto_link` rule to generate `.pb.go` files and add them to the proto directory.
-
 Generated files don't necessarily need to be checked in to repo. In this example, generated files are checked in. They
 are only necessary for local development. Otherwise, Bazel will handle generating the pb file during build.
 
 ```bash
-bazel run //pb/helloworld:helloworld_go_proto_link
+make link
 ```
 
 ## Test repo
@@ -255,7 +253,6 @@ GRPC
 
 Bazelbuild rules
 
-- [golink](https://github.com/nikunjy/golink)
 - [rules_docker](https://github.com/bazelbuild/rules_docker)
 - [rules_go](https://github.com/bazelbuild/rules_go)
 - [rules_k8s](https://github.com/bazelbuild/rules_k8s)
