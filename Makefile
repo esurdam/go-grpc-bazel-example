@@ -1,5 +1,4 @@
 .PHONY: build clean gazelle link fmt test coverage
-
 .DEFAULT_GOAL = build
 
 build:
@@ -17,10 +16,7 @@ gazelle:
 	bazel run //:gazelle -- update-repos -from_file=go.mod -prune=true
 
 link:
-	for i in $$(bazel query 'kind(".*_link rule", //pb/...)') ; do \
-		bazel run $$i ; \
-	done
-
+	bash ci/link.sh
 
 test:
 	bash ci/test.sh

@@ -1,4 +1,4 @@
-// +build local
+// +build !bazel
 
 package main
 
