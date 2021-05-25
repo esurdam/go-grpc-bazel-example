@@ -147,7 +147,7 @@ k8s_defaults(
     #   kubectl config current-context
     cluster = "$(cluster)",
     context = "$(cluster)",
-    image_chroot = "ghcr.io/adgreetz-{BUILD_USER}/{ENV}",
+    image_chroot = "ghcr.io/adgreetz/go-grpc-bazel-example/{ENV}",
     kind = "deployment",
     namespace = "$(namespace)",
 )

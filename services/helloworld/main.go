@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	port     = flag.Int("port", 10000, "grpc port to listen on")
-	httpPort = flag.Int("http-port", 8090, "http port to listen on (serve json API)")
+	port     = flag.Int("port", 1000, "grpc port to listen on")
+	httpPort = flag.Int("http-port", 80, "http port to listen on (serve json API)")
 )
 
 func main() {

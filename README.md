@@ -37,30 +37,35 @@ tools       # tool versioning
 ## Create a new service
 
 Create proto file and define types/service.
+
 ```bash
 touch pb/helloworld/helloworld.proto # Add definitions to this file
 ```
 
-Generate `BUILD.bazel` files which contain proto and library definitions, then run `make link` to add
-the generated files locally.
+Generate `BUILD.bazel` files which contain proto and library definitions, then run `make link` to add the generated
+files locally.
+
 ```bash
 make gazelle
 make link
 ```
 
 Implement proto service in `pkg`
+
 ```bash
 mkdir pkg/helloworld/server
 touch pkg/helloworld/server/server.go
 ```
 
 Create service entrypoint in `services`
+
 ```bash
 mkdir services/helloworld
 touch services/helloworld/main.go
 ```
 
 Define kubernetes service in `ci/services`
+
 ```bash
 touch ci/services/helloworld.yml
 ```
@@ -79,9 +84,8 @@ BUILD.bazel files located in pb directory will contain grpc rules.
 
 Run `*_go_proto_link` rule to generate `.pb.go` files and add them to the proto directory.
 
-Generated files don't necessarily need to be checked in to repo.
-In this example, generated files are checked in. They are only necessary for local development.
-Otherwise, Bazel will handle generating the pb file during build.
+Generated files don't necessarily need to be checked in to repo. In this example, generated files are checked in. They
+are only necessary for local development. Otherwise, Bazel will handle generating the pb file during build.
 
 ```bash
 bazel run //pb/helloworld:helloworld_go_proto_link
@@ -90,11 +94,13 @@ bazel run //pb/helloworld:helloworld_go_proto_link
 ## Test repo
 
 To run all tests:
+
 ```bash
 make test
 ```
 
 Test individual package:
+
 ```bash
 bazel test --features race \
   --verbose_failures \
@@ -108,7 +114,7 @@ Tests can also be aggregated into test groups to be tested at once.
 ## Running service locally
 
 ```bash
-bazel run //services/helloworld:helloworld
+bazel run //services/helloworld:helloworld -- -port 8090 -http-port 10000
 ```
 
 Then we use cURL to send HTTP requests:
@@ -116,8 +122,11 @@ Then we use cURL to send HTTP requests:
 ```bash
 curl -X POST -k http://localhost:8090/v1/greeter -d '{"name": "TestName"}'
 ```
+
 ```json
-{"message":"Hello TestName!"}
+{
+  "message": "Hello TestName!"
+}
 ```
 
 You can view the swagger at [http://localhost:8090/swagger.json](http://localhost:8090/swagger.json)
@@ -134,6 +143,7 @@ go_image(
     ],
 )
 ```
+
 To run the binary in docker:
 
 ```bash
@@ -155,8 +165,8 @@ make fmt
 
 Each service should contain a `k8s_deploy` rule, which defines the cluster deployment.
 
-This rule builds the binary in Docker, pushes the image to the container registry, 
-and deploys the service to the defined Kubernetes cluster. 
+This rule builds the binary in Docker, pushes the image to the container registry, and deploys the service to the
+defined Kubernetes cluster.
 
 ```
 k8s_deploy(
@@ -169,6 +179,35 @@ k8s_deploy(
 ```
 
 Each service is expected to have an exported yaml file for configuration exposed in the `ci/services` directory.
+
+To deploy services to k8s (local example):
+
+```bash
+SERVICE="helloworld"
+export ENV="dev"
+
+CLUSTER="docker-for-desktop-cluster"
+NAMESPACE="development"
+export PUSH_REPO="localhost:5000"
+
+echo "deploying environment..."
+echo "ENV: $ENV"
+echo "NAMESPACE: $NAMESPACE"
+echo "CLUSTER: $CLUSTER"
+echo "SERVICE: $SERVICE"
+echo "PUSH_REPO: $PUSH_REPO"
+
+bazel run \
+            --stamp \
+            --workspace_status_command=./ci/status.sh \
+            --define cluster="$CLUSTER" \
+            --define namespace="$NAMESPACE" \
+            --define env="$ENV" \
+            --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
+            --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+            --cpu=k8 \
+            "//services/helloworld:k8s.apply"
+```
 
 ### Pushing service to container registry
 
@@ -199,9 +238,11 @@ bazel run \
 ## Useful Links
 
 GRPC
+
 - [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
 
 Bazelbuild rules
+
 - [golink](https://github.com/nikunjy/golink)
 - [rules_docker](https://github.com/bazelbuild/rules_docker)
 - [rules_go](https://github.com/bazelbuild/rules_go)
