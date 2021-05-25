@@ -1,4 +1,6 @@
 bazel-*
 .idea
 
-coverage.*
+coverage.html
+coverage.txt
+

@@ -15,7 +15,6 @@ In this case, `helloworld` will be implemented in `pkg`.
 - [Test locally](#test-repo)
 - [Running locally](#running-service-locally)
 - [Deployment](#deployment)
-
 - [Useful Links/Resources](#useful-links)
 
 ## Layout
