@@ -25,4 +25,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: code covarege report
-          path: coverage.txt
+          path: |
+            coverage.html
+            coverage.txt
