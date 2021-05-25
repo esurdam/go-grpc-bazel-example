@@ -21,12 +21,15 @@ In this case, `helloworld` will be implemented in `pkg`.
 ## Layout
 
 ```
-ci          # contains ci/automation scripts
-cmd         # command line tool entrypoints
-pb          # contains all proto definitions and gen output
-pkg         # contains proto implementations
-services    # entrypoints for kubernetes defined microservices
-tools       # tool versioning
+.github/     # github Action CI configs
+ci/          # contains ci/automation scripts
+cmd/         # command line tool entrypoints
+pb/          # contains all proto definitions and gen output
+pkg/         # contains proto implementations
+services/    # entrypoints for kubernetes defined microservices
+tools/       # tool versioning
+BUILD        # root bazel BUILD definitions; aggregates services
+WORKSPACE    # bazel workspace rules; external code 
 ```
 
 ## Requirements
