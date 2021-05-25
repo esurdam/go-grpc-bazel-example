@@ -185,15 +185,6 @@ load(
 
 _go_image_repos()
 
-# Golink for Gazelle
-# Allows auto linking of generated proto files
-http_archive(
-    name = "golink",
-    sha256 = "ea728cfc9cb6e2ae024e1d5fbff185224592bbd4dad6516f3cc96d5155b69f0d",
-    strip_prefix = "golink-1.0.0",
-    urls = ["https://github.com/nikunjy/golink/archive/v1.0.0.tar.gz"],
-)
-
 load("@io_bazel_rules_go//extras:embed_data_deps.bzl", "go_embed_data_dependencies")
 
 go_embed_data_dependencies()

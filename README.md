@@ -10,6 +10,7 @@ implementation can be included in `services/{{.packageName}}/pkg/`.
 In this case, `helloworld` will be implemented in `pkg`.
 
 - [Create new service](#create-a-new-service)
+- [Development](#development)
 - [Generating BUILD.bazel files](#generating-build-files)
 - [Generating proto files](#generating-proto-files-(development))
 - [Test locally](#test-repo)
@@ -71,6 +72,14 @@ touch ci/services/helloworld.yml
 ```
 
 Lastly, add the service definition to aggregate rule in `BUILD`.
+
+## Development
+
+Run make link to generate proto files locally for development access.
+
+```bash
+make link
+```
 
 ## Generating BUILD files
 
