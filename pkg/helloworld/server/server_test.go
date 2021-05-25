@@ -34,6 +34,19 @@ func TestServer_SayHello(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "TestServer_SayHello2",
+			args: args{
+				ctx: context.Background(),
+				req: &pb.HelloRequest{
+					Name: "user",
+				},
+			},
+			want: &pb.HelloReply{
+				Message: "Hello user!",
+			},
+			wantErr: false,
+		},
+		{
 			name: "TestServer_SayHelloErr",
 			args: args{
 				ctx: context.Background(),
