@@ -210,8 +210,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_net",
     importpath = "golang.org/x/net",
-    sum = "h1:b0LrWgu8+q7z4J+0Y3Umo5q1dL7NXBkKBWkaVkAq17E=",
-    version = "v0.0.0-20210316092652-d523dce5a7f4",
+    sum = "h1:4nGaVu0QrbjT/AK2PRLuQfQuh6DJve+pELhqTdAj3x0=",
+    version = "v0.0.0-20210405180319-a5a99cb37ef4",
 )
 
 go_repository(
@@ -413,8 +413,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_sys",
     importpath = "golang.org/x/sys",
-    sum = "h1:EZ2mChiOa8udjfp6rRmswTbtZN/QzUQp4ptM4rnjHvc=",
-    version = "v0.0.0-20210320140829-1e4c9ba3b0c4",
+    sum = "h1:gG67DSER+11cZvqIMb8S8bt0vZtiN6xWYARwirrOSfE=",
+    version = "v0.0.0-20210510120138-977fb7262007",
 )
 
 go_repository(
