@@ -202,6 +202,7 @@ GRPC
 - [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
 
 Bazelbuild rules
+- [golink](https://github.com/nikunjy/golink)
 - [rules_docker](https://github.com/bazelbuild/rules_docker)
 - [rules_go](https://github.com/bazelbuild/rules_go)
 - [rules_k8s](https://github.com/bazelbuild/rules_k8s)

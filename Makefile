@@ -17,7 +17,10 @@ gazelle:
 	bazel run //:gazelle -- update-repos -from_file=go.mod -prune=true
 
 link:
-	bazel run //pb/helloworld:helloworld_go_proto_link
+	for i in $$(bazel query 'kind(".*_link rule", //pb/...)') ; do \
+		bazel run $$i ; \
+	done
+
 
 test:
 	bash ci/test.sh
