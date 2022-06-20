@@ -131,7 +131,7 @@ bazel run //services/helloworld:helloworld -- -port 8090 -http-port 10000
 Then we use cURL to send HTTP requests:
 
 ```bash
-curl -X POST -k http://localhost:8090/v1/greeter -d '{"name": "TestName"}'
+curl -X POST -k http://localhost:10000/v1/greeter -d '{"name": "TestName"}'
 ```
 
 ```json
