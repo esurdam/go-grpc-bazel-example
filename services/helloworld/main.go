@@ -12,6 +12,7 @@ import (
 	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
 	"github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	zerolog "github.com/philip-bui/grpc-zerolog"
 	"google.golang.org/grpc"
 )
 
@@ -28,6 +29,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	var opts []grpc.ServerOption
+	opts = append(opts, zerolog.UnaryInterceptor())
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterGreeterServer(grpcServer, &server.Server{})
 	log.Printf("Now listening for grpc on localhost:%d\n", *port)
