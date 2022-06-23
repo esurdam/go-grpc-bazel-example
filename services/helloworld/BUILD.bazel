@@ -3,7 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_embed_data", "go_library
 go_library(
     name = "helloworld_lib",
     srcs = [
-        "data.go",
         "main.go",
     ],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
