@@ -3,18 +3,18 @@
 # It is required to successfully pass a Travis build on the master branch.
 
 echo "Checking go formatting..."
-gofiles=$(git ls-files | grep '.go$' | grep -v 'pb.go$' | grep -v 'pb.gw.go$' | xargs gofmt -e -l -s )
-for i in ${gofiles[@]}; do
+gofiles=$(git ls-files | grep '.go$' | grep -v 'pb.go$' | grep -v 'pb.gw.go$')
+gofmtfiles=$(echo $gofiles | xargs gofmt -e -l -s )
+for i in ${gofmtfiles[@]}; do
     echo "formatting $i"
     gofmt -w -s "${i}"
 done
 
 echo "Checking goimports formatting..."
-gofiles=$(git ls-files | grep '.go$' | grep -v 'pb.go$' | grep -v 'pb.gw.go$' | xargs goimports -e -l )
-for i in ${gofiles[@]}; do
+goimpfiles=$(echo $gofiles | xargs goimports -e -l )
+for i in ${goimpfiles[@]}; do
     echo "formatting $i"
     goimports -w "${i}"
 done
 
-buildifier -mode=fix $(find . -type f \( -iname BUILD -or -iname BUILD.bazel \) | grep -v node_modules | grep -v vendor)
-buildifier -mode=fix ./WORKSPACE
+buildifier -mode=fix --lint=fix $(find . -type f \( -iname BUILD -or -iname BUILD.bazel -or -iname WORKSPACE -or -iname go.bzl \) | grep -v node_modules | grep -v vendor)

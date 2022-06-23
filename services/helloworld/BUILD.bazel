@@ -1,8 +1,12 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_embed_data", "go_library")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
+load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
 
 go_library(
     name = "helloworld_lib",
     srcs = [
+        "data.go",
         "main.go",
     ],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
@@ -10,7 +14,7 @@ go_library(
     deps = [
         "//pb/helloworld:helloworld_gateway_lib_proto",
         "//pkg/helloworld/server",
-        "@com_github_philip_bui_grpc_zerolog//:grpc-zerolog",
+        "@com_github_philip_bui_grpc_zerolog//:go_default_library",
         "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
     ],
@@ -29,9 +33,6 @@ go_embed_data(
     src = "//pb/helloworld:helloworld_gateway_grpc",
     package = "main",
 )
-
-load("@io_bazel_rules_docker//go:image.bzl", "go_image")
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
 
 go_image(
     name = "docker",
@@ -53,8 +54,6 @@ docker_push(
     repository = "adgreetz/go-grpc-bazel-example/services/helloworld",
     tag = "$(version)",
 )
-
-load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
 
 k8s_deploy(
     name = "k8s",
