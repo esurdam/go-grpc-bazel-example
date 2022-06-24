@@ -1,7 +1,11 @@
-package(default_visibility = ["@//visibility:public"])
-
 load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle_binary")
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_bundle")
+load(
+    "@io_bazel_rules_docker//contrib:push-all.bzl",
+    docker_pushall = "docker_push",
+)
+
+package(default_visibility = ["@//visibility:public"])
 
 # gazelle:resolve go github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld //pb/helloworld:helloworld_gateway_lib_proto
 # gazelle:resolve go github.com/grpc-ecosystem/grpc-gateway/v2/runtime @grpc_ecosystem_grpc_gateway//runtime:go_default_library
@@ -15,12 +19,6 @@ gazelle(
 filegroup(
     name = "coverage_files",
     srcs = glob(["bazel-out/**/coverage.dat"]),
-)
-
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_bundle")
-load(
-    "@io_bazel_rules_docker//contrib:push-all.bzl",
-    docker_pushall = "docker_push",
 )
 
 docker_bundle(

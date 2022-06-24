@@ -14,12 +14,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15
+          go-version: 1.17.x
 
       - name: Setup bazel
         uses: jwlawson/actions-setup-bazel@v1
         with:
-          bazel-version: '3.5.0'
+          bazel-version: '5.1.0'
 
       - uses: actions/checkout@v2
 
