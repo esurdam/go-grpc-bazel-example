@@ -275,6 +275,14 @@ def go_deps():
         version = "v1.6.6",
     )
     go_repository(
+        name = "org_golang_google_genproto",
+        build_file_proto_mode = "disable",
+        importpath = "google.golang.org/genproto",
+        sum = "h1:itnFmgk4Ls5nT+mYO2ZK6F0DpKsGZLhB5BB9y5ZL2HA=",
+        version = "v0.0.0-20220623142657-077d458a5694",
+    )
+
+    go_repository(
         name = "org_golang_google_grpc",
         build_file_proto_mode = "disable",
         importpath = "google.golang.org/grpc",
@@ -320,8 +328,8 @@ def go_deps():
         name = "org_golang_x_net",
         build_file_proto_mode = "disable",
         importpath = "golang.org/x/net",
-        sum = "h1:Yqz/iviulwKwAREEeUd3nbBFn0XuyJqkoft2IlrvOhc=",
-        version = "v0.0.0-20220617184016-355a448f1bc9",
+        sum = "h1:dAgbJ2SP4jD6XYfMNLVj0BF21jo2PjChrtGaAvF5M3I=",
+        version = "v0.0.0-20220622184535-263ec571b305",
     )
     go_repository(
         name = "org_golang_x_oauth2",
@@ -341,8 +349,8 @@ def go_deps():
         name = "org_golang_x_sys",
         build_file_proto_mode = "disable",
         importpath = "golang.org/x/sys",
-        sum = "h1:aFV+BgZ4svzjfabn8ERpuB4JI4N6/rdy1iusx77G3oU=",
-        version = "v0.0.0-20220615213510-4f61da869c0c",
+        sum = "h1:wEZYwx+kK+KlZ0hpvP2Ls1Xr4+RWnlzGFwPP0aiDjIU=",
+        version = "v0.0.0-20220622161953-175b2fd9d664",
     )
     go_repository(
         name = "org_golang_x_term",

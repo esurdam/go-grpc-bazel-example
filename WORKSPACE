@@ -55,7 +55,7 @@ load("@grpc_ecosystem_grpc_gateway//:repositories.bzl", "go_repositories")
 
 go_repositories()
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 load("//:go.bzl", "go_deps")
 
 # gazelle:repository_macro go.bzl%go_deps
