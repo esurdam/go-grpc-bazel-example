@@ -9,6 +9,7 @@ go_library(
     srcs = [        
         "main.go",
     ],
+    embed = [":static_assets"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
@@ -38,7 +39,6 @@ go_image(
     name = "docker",
     embed = [
         ":helloworld_lib",
-        ":static_assets",
     ],
     gc_linkopts = [
         "-s",

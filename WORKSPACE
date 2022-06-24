@@ -8,12 +8,6 @@ bind(
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # ================================================================
-# Go support requires rules_go
-# ================================================================
-
-# gazelle:repo bazel_gazelle
-
-# ================================================================
 # Proto GRPC support
 # https://github.com/rules-proto-grpc/rules_proto_grpc
 # ================================================================
@@ -128,28 +122,6 @@ k8s_defaults(
     namespace = "$(namespace)",
 )
 
-# PROTO
-# https://github.com/bazelbuild/rules_go/blob/0.19.0/go/workspace.rst#proto-dependencies
-
-http_archive(
-    name = "com_google_protobuf",
-    sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
-    strip_prefix = "protobuf-3.11.4",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
-go_repository(
-    name = "org_golang_google_genproto",
-    build_file_proto_mode = "disable",
-    importpath = "google.golang.org/genproto",
-    sum = "h1:kqrS+lhvaMHCxul6sKQvKJ8nAAhlVItmZV822hYFH/U=",
-    version = "v0.0.0-20220617124728-180714bec0ad",
-)
-
 # We use go_image to build a sample service
 load(
     "@io_bazel_rules_docker//go:image.bzl",
@@ -161,3 +133,13 @@ _go_image_repos()
 load("@io_bazel_rules_go//extras:embed_data_deps.bzl", "go_embed_data_dependencies")
 
 go_embed_data_dependencies()
+
+# gazelle:repo bazel_gazelle
+
+# Golink for Gazelle
+http_archive(
+    name = "golink",
+    sha256 = "ea728cfc9cb6e2ae024e1d5fbff185224592bbd4dad6516f3cc96d5155b69f0d",
+    strip_prefix = "golink-1.0.0",
+    urls = ["https://github.com/nikunjy/golink/archive/v1.0.0.tar.gz"],
+)
