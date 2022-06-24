@@ -21,7 +21,7 @@ jobs:
         with:
           bazel-version: '5.1.0'
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Mount bazel cache
         uses: actions/cache@v3.0.1
