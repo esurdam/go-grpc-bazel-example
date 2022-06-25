@@ -3,9 +3,7 @@
 
 env GO111MODULE=on
 
-set -e
-set -u
-set -x
+set -eux
 
 gocount=$(git ls-files | grep '.go$' | grep -v 'bindata_assetfs.go$' | grep -v 'bindatafs.go$' | grep -v 'pb.go$' | grep -v 'bindata.go$' | grep -v 'pb.gw.go$' | xargs gofmt -e -l -s | wc -l)
 if [ "$gocount" -gt 0 ]; then

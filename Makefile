@@ -19,7 +19,7 @@ link: ## Link bazel build proto to local
 	bash ci/link.sh
 
 test: ## Run test
-	bash ci/test.sh
+	@bash ci/test.sh
 
 .PHONY: help
 help:
