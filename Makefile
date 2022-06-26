@@ -8,7 +8,7 @@ coverage: ## Generate coverage report
 	@bash ci/coverage.sh
 
 fmt: ## Run build-fmt
-	b@ash ci/build-fmt.sh
+	@bash ci/build-fmt.sh
 
 gazelle: ## Run link, go mod and gazelle
 	@go mod tidy
