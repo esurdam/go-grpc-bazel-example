@@ -37,10 +37,6 @@ go_image(
     embed = [
         ":helloworld_lib",
     ],
-    gc_linkopts = [
-        "-s",
-        "-w",
-    ],
     visibility = ["//visibility:public"],
 )
 
