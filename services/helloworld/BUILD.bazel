@@ -3,20 +3,17 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
 load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
 
-# gazelle:ignore
 go_library(
     name = "helloworld_lib",
-    srcs = [        
-        "main.go",
-    ],
+    srcs = ["main.go"],
     embed = [":static_assets"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
-        "//pb/helloworld:helloworld_gateway_lib_proto",
+        "//pb/helloworld",
         "//pkg/helloworld/server",
-        "@com_github_philip_bui_grpc_zerolog//:go_default_library",
-        "@grpc_ecosystem_grpc_gateway//runtime:go_default_library",
+        "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
+        "@com_github_philip_bui_grpc_zerolog//:grpc-zerolog",
         "@org_golang_google_grpc//:go_default_library",
     ],
 )
@@ -31,7 +28,7 @@ go_binary(
 # Embeds the swagger json as var "Data"
 go_embed_data(
     name = "static_assets",
-    src = "//pb/helloworld:helloworld_gateway_grpc",
+    src = "//pb/helloworld:helloworld_openapi_swagger",
     package = "main",
 )
 
