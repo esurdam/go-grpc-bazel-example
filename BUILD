@@ -21,7 +21,8 @@ filegroup(
 docker_bundle(
     name = "bundle",
     images = {
-        "ghcr.io/adgreetz/go-grpc-bazel-example:{BUILD_USER}": "//services/helloworld:docker",
+        "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:{BUILD_USER}": "//services/helloworld:docker",
+        "ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client:{BUILD_USER}": "//cmd/helloworld-client:docker",
     },
 )
 
