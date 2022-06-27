@@ -10,21 +10,15 @@ proto_library(
     deps = ["@go_googleapis//google/api:annotations_proto"],
 )
 
-### Manually defined
-gateway_grpc_library(
-    name = "helloworld_gateway_proto",
+go_proto_library(
+    name = "helloworld_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
-    protos = [":helloworld_proto"],
+    proto = ":helloworld_proto",
     visibility = ["//visibility:public"],
+    deps = ["@go_googleapis//google/api:annotations_go_proto"],
 )
 
-gateway_openapiv2_compile(
-    name = "helloworld_openapi_swagger",
-    protos = [":helloworld_proto"],
-    visibility = ["//visibility:public"],
-)
-
-# gazelle:exclude
 go_library(
     name = "helloworld",
     embed = [":helloworld_gateway_proto"],
@@ -40,4 +34,18 @@ go_library(
         "@org_golang_google_grpc//status",
         "@org_golang_google_protobuf//proto",
     ],
+)
+
+### Manually defined
+gateway_grpc_library(
+    name = "helloworld_gateway_proto",
+    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
+    protos = [":helloworld_proto"],
+    visibility = ["//visibility:public"],
+)
+
+gateway_openapiv2_compile(
+    name = "helloworld_openapi_swagger",
+    protos = [":helloworld_proto"],
+    visibility = ["//visibility:public"],
 )
