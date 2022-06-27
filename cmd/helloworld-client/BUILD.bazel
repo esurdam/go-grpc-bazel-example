@@ -5,10 +5,7 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/cmd/helloworld-client",
     visibility = ["//visibility:private"],
-    deps = [
-        "//pb/helloworld",
-        "@org_golang_google_grpc//:go_default_library",
-    ],
+    deps = ["@org_golang_google_grpc//:go_default_library"],
 )
 
 go_binary(

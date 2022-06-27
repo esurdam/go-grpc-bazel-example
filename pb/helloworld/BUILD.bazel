@@ -23,16 +23,6 @@ gateway_openapiv2_compile(
     protos = [":helloworld_proto"],
     visibility = ["//visibility:public"],
 )
-###
-
-go_proto_library(
-    name = "helloworld_go_proto",
-    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
-    proto = ":helloworld_proto",
-    visibility = ["//visibility:public"],
-    deps = ["@go_googleapis//google/api:annotations_go_proto"],
-)
 
 # gazelle:exclude
 go_library(
