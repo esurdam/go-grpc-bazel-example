@@ -125,7 +125,7 @@ Tests can also be aggregated into test groups to be tested at once.
 ## Running service locally
 
 ```bash
-bazel run //services/helloworld:helloworld -- -port 8090 -http-port 10000
+bazel run //services/helloworld:helloworld -- -port 9000 -http-port 10000
 ```
 
 Then we use cURL to send HTTP requests:
@@ -140,7 +140,27 @@ curl -X POST -k http://localhost:10000/v1/greeter -d '{"name": "TestName"}'
 }
 ```
 
-You can view the swagger at [http://localhost:8090/swagger.json](http://localhost:8090/swagger.json)
+You can view the swagger at [http://localhost:10000/swagger.json](http://localhost:10000/swagger.json)
+
+### Client
+
+With the server running, you can test command line tools from `cmd`. 
+```text
+$ bazel run //cmd/helloworld-client -- --name "Test Name" --server-addr :900
+0
+
+INFO: Analyzed target //cmd/helloworld-client:helloworld-client (1 packages loaded, 3 targets configured).
+INFO: Found 1 target...
+Target //cmd/helloworld-client:helloworld-client up-to-date:
+  bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client
+INFO: Elapsed time: 0.327s, Critical Path: 0.10s
+INFO: 2 processes: 1 internal, 1 darwin-sandbox.
+INFO: Build completed successfully, 2 total actions
+INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-clien
+INFO: Build completed successfully, 2 total actions
+
+2022/06/26 02:29:31 message:"Hello Test Name!"
+```
 
 ### Running with Docker locally
 
@@ -161,7 +181,8 @@ To run the binary in docker:
 bazel run \
   --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
-  //services/helloworld:docker
+  //services/helloworld:docker \
+  -- --port 9000 --http-port 10000
 ```
 
 ## Swagger + JSON Gateway

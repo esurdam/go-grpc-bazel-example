@@ -2,24 +2,24 @@
 .DEFAULT_GOAL = help
 
 build: ## Build services
-	bash ci/build-service.sh
+	@bash ci/build-service.sh
 
 coverage: ## Generate coverage report
-	bash ci/coverage.sh
+	@bash ci/coverage.sh
 
 fmt: ## Run build-fmt
-	bash ci/build-fmt.sh
+	@bash ci/build-fmt.sh
 
-gazelle: ## Run go mod and gazelle
-	go mod tidy
-	@bazel run //:gazelle fix
+gazelle: ## Run link, go mod and gazelle
+	@go mod tidy
+	@bazel run //:gazelle -- fix -build_tags=bazel
 	@bazel run //:gazelle -- update-repos -from_file=go.mod -prune=true -build_file_proto_mode=disable -to_macro go.bzl%go_deps
 
 link: ## Link bazel build proto to local
-	bash ci/link.sh
+	@bash ci/link.sh
 
 test: ## Run test
-	bash ci/test.sh
+	@bash ci/test.sh
 
 .PHONY: help
 help:

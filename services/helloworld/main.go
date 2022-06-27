@@ -67,6 +67,6 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Printf("Serving gRPC-Gateway on http://0.0.0.0:%d", *httpPort)
+	log.Printf("Serving http at http://0.0.0.0:%d", *httpPort)
 	log.Fatalln(gwServer.ListenAndServe())
 }
