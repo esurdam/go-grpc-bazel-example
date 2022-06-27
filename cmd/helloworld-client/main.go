@@ -9,9 +9,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Cache[V comparable] struct {
-}
-
 func main() {
 	var serverAddr = flag.String("server-addr", ":9000", "grpc server address")
 	var name = flag.String("name", "", "name to greet")
