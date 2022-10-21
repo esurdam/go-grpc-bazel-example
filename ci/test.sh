@@ -2,6 +2,12 @@
 # This script is used to test the repo
 
 env GO111MODULE=on
+BUILDIFIER_VERSION="5.1.0"
+
+which buildifier >/dev/null
+if [ $? -ne 0 ]; then
+  go install github.com/bazelbuild/buildtools/buildifier@$BUILDIFIER_VERSION
+fi
 
 set -eux
 
