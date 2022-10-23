@@ -10,12 +10,12 @@ implementation can be included in `services/{{.packageName}}/pkg/`.
 In this case, `helloworld` will be implemented in `pkg`.
 
 - [Create new service](#create-a-new-service)
+- [Swagger + JSON Gateway](#swagger--json-gateway)
 - [Development](#development)
 - [Generating BUILD.bazel files](#generating-build-files)
-- [Generating proto files](#generating-proto-files-(development))
-- [Test locally](#test-repo)
+- [Generating proto files](#generating-proto-files)
+- [Test locally](#testing)
 - [Running locally](#running-service-locally)
-- [Swagger + JSON Gateway](#swagger--json-gateway)
 - [Deployment](#deployment)
 - [Useful Links/Resources](#useful-links)
 
@@ -58,7 +58,7 @@ make link
 Implement proto service in `pkg`
 
 ```bash
-mkdir pkg/helloworld/server
+mkdir -p pkg/helloworld/server
 touch pkg/helloworld/server/server.go
 ```
 
@@ -72,117 +72,32 @@ touch services/helloworld/main.go
 Define kubernetes service in `ci/services`
 
 ```bash
-touch ci/services/helloworld.yml
+touch ci/services/helloworld.yaml
 ```
 
 Lastly, add the service definition to aggregate rule in `BUILD`.
 
-## Development
-
-Run make link to generate proto files locally for development access.
-
-```bash
-make link
+Below represents a service scaffold.
 ```
-
-## Generating BUILD files
-
-Run `make gazelle` to generate/update BUILD files (which include test and binaries).
-
-This also updates the WORKSPACE with required deps.
-
-BUILD.bazel files located in pb directory will contain grpc rules.
-
-## Generating proto files (development)
-
-Generated files don't necessarily need to be checked in to repo. In this example, generated files are checked in. They
-are only necessary for local development. Otherwise, Bazel will handle generating the pb file during build.
-
-```bash
-make link
-```
-
-## Test repo
-
-To run all tests:
-
-```bash
-make test
-```
-
-Test individual package:
-
-```bash
-bazel test --features race \
-  --verbose_failures \
-  --test_output=errors \
-  --action_env=CI=true \
-  //pkg/helloworld/server:go_default_test
-```
-
-Tests can also be aggregated into test groups to be tested at once.
-
-## Running service locally
-
-```bash
-bazel run //services/helloworld:helloworld -- -port 9000 -http-port 10000
-```
-
-Then we use cURL to send HTTP requests:
-
-```bash
-curl -X POST -k http://localhost:10000/v1/greeter -d '{"name": "TestName"}'
-```
-
-```json
-{
-  "message": "Hello TestName!"
-}
-```
-
-You can view the swagger at [http://localhost:10000/swagger.json](http://localhost:10000/swagger.json)
-
-### Client
-
-With the server running, you can test command line tools from `cmd`. 
-```text
-$ bazel run //cmd/helloworld-client -- --name "Test Name" --server-addr :900
-0
-
-INFO: Analyzed target //cmd/helloworld-client:helloworld-client (1 packages loaded, 3 targets configured).
-INFO: Found 1 target...
-Target //cmd/helloworld-client:helloworld-client up-to-date:
-  bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client
-INFO: Elapsed time: 0.327s, Critical Path: 0.10s
-INFO: 2 processes: 1 internal, 1 darwin-sandbox.
-INFO: Build completed successfully, 2 total actions
-INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-clien
-INFO: Build completed successfully, 2 total actions
-
-2022/06/26 02:29:31 message:"Hello Test Name!"
-```
-
-### Running with Docker locally
-
-Each service should contain a `docker` rule, which builds the binary in a docker image:
-
-```
-go_image(
-    name = "docker",
-    embed = [
-        ":helloworld_lib",
-    ],
-)
-```
-
-To run the binary in docker:
-
-```bash
-bazel run \
-  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
-  --cpu=k8 \
-  //services/helloworld:docker \
-  -- --port 9000 --http-port 10000
+project   
+│
+└───ci
+│   └───services
+│       │   helloworld.yaml
+│
+└───pb
+│   └───helloworld
+│       │   helloworld.proto
+│   
+└───pkg
+│   └───helloworld
+│       └───server
+│           │   server.go
+|
+└───services
+│   └───helloworld
+│       │   main.go
+|
 ```
 
 ## Swagger + JSON Gateway
@@ -220,7 +135,132 @@ go_embed_data(
 
 Services can then expose the `swagger.json` file directly. 
 
-## Deployment
+# Development
+
+Run make link to generate proto files locally for development access.
+
+```bash
+make link
+```
+
+## Generating BUILD files
+
+Run `make gazelle` to generate/update BUILD files (which include test and binaries).
+
+This also updates the WORKSPACE with required deps.
+
+BUILD.bazel files located in pb directory will contain grpc rules.
+
+## Generating proto files
+
+Generated files don't necessarily need to be checked in to repo. In this example, generated files are checked in. They are only necessary for local development. Otherwise, Bazel will handle generating the pb file during build.
+
+It is generally a good idea to track changes to pb in repo.
+
+```bash
+make link
+```
+
+## Testing
+
+To run all tests:
+
+```bash
+make test
+```
+
+Test individual package:
+
+```bash
+bazel test --features race \
+  --verbose_failures \
+  --test_output=errors \
+  --action_env=CI=true \
+  //pkg/helloworld/server:go_default_test
+```
+
+Tests can also be aggregated into test groups to be tested at once.
+
+## Running service locally
+
+Generate a self-signed certificate (cert.pem & key.pem) to run services locally. Required for multiplexing grpc/http2 over single port. 
+
+### TLS
+
+You can add any other hostnames as necessary.
+
+```bash
+mkdir -p ssl && \
+  (cd ssl && \
+    go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits 2048 --host 127.0.0.1,::1,localhost,localhost:443,localhost:4443 --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h)
+```
+
+### Running
+
+Use bazel to run the service
+```bash
+bazel run //services/helloworld:helloworld -- -http-port 4443 -cert $(pwd)/ssl/cert.pem -key $(pwd)/ssl/key.pem
+```
+
+Then we use cURL to send HTTP requests
+
+```bash
+curl -X POST -k https://localhost:4443/v1/greeter -d '{"name": "TestName"}
+```
+```json
+{
+  "message": "Hello TestName!"
+}
+```
+
+You can view the swagger at [https://localhost:4443/swagger.json](https://localhost:4443/swagger.json)
+
+### Client
+
+With the server running, you can test command line tools from `cmd`. 
+```text
+$ bazel run //cmd/helloworld-client -- \
+    --name "Test Name" \
+    --server-addr localhost:4443 \
+    --cert $(pwd)/ssl/cert.pem
+
+INFO: Analyzed target //cmd/helloworld-client:helloworld-client (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //cmd/helloworld-client:helloworld-client up-to-date:
+  bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client
+INFO: Elapsed time: 0.365s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client --name 'Test Name' --server-addr localhost:4443 --cert ...
+INFO: Build completed successfully, 1 total action
+
+2022/10/22 18:03:59 message:"Hello Test Name!"
+```
+
+### Running with Docker locally
+
+Each service should contain a `docker` rule, which builds the binary in a docker image:
+
+```
+go_image(
+    name = "docker",
+    embed = [
+        ":helloworld_lib",
+    ],
+)
+```
+
+To run the binary in docker:
+
+```bash
+bazel run \
+  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+  --cpu=k8 \
+  //services/helloworld:docker \
+  -- --http-port 4443 --cert $(pwd)/ssl/cert.pem --key $(pwd)/ssl/key.pem
+```
+
+# Deployment
 
 CI checks for formatting; ensure formatting with `make fmt`
 
@@ -228,7 +268,7 @@ CI checks for formatting; ensure formatting with `make fmt`
 make fmt
 ```
 
-### Kubernetes deployment
+## Kubernetes
 
 Each service should contain a `k8s_deploy` rule, which defines the cluster deployment.
 
@@ -246,6 +286,8 @@ k8s_deploy(
 ```
 
 Each service is expected to have an exported yaml file for configuration exposed in the `ci/services` directory.
+
+* Each service should mount its own tls via kubernetes secrets, not included in this example repo
 
 To deploy services to k8s (local example):
 
@@ -276,7 +318,7 @@ bazel run \
             "//services/helloworld:k8s.apply"
 ```
 
-### Pushing service to container registry
+## Pushing service to container registry
 
 Used to deploy a service to the container registry.
 
@@ -302,7 +344,7 @@ bazel run \
   //services/helloworld:push
 ```
 
-## Useful Links
+# Useful Links
 
 GRPC
 

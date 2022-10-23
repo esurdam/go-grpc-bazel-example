@@ -25,7 +25,7 @@ spec:
         - name: helloworld-container
           image: services/helloworld:latest
           ports:
-            - containerPort: 80
+            - containerPort: 443
           imagePullPolicy: Always
           resources:
             requests:
@@ -38,11 +38,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /swagger.json
-              port: 80
+              port: 443
           readinessProbe:
             httpGet:
               path: /swagger.json
-              port: 80
+              port: 443
           env:
             - name: DEPLOY
               value: VERSION
@@ -62,9 +62,7 @@ metadata:
     prometheus.io/scrape: 'true'
 spec:
   ports:
-    - port: 80
-      name: frontend
-    - port: 1000
-      name: grpc
+    - port: 443
+      name: mux
   selector:
     app: helloworld
