@@ -26,6 +26,7 @@ var (
 	sslCert   = flag.String("cert", "", "path to tls cert")
 	sslKey    = flag.String("key", "", "path to tls key")
 	sslCACert = flag.String("ca-cert", "", "path to tls ca cert")
+	insecure  = flag.Bool("insecure", false, "enable insecure tls skip verify for grpc-gateway")
 )
 
 func grpcHandlerFunc(grpcServer *grpc.Server, httpServer http.Handler) http.Handler {
@@ -86,8 +87,9 @@ func main() {
 	defer cancel()
 
 	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName: addr,
-		RootCAs:    rootCAs,
+		ServerName:         addr,
+		RootCAs:            rootCAs,
+		InsecureSkipVerify: *insecure,
 	})
 	dopts := []grpc.DialOption{
 		grpc.WithTransportCredentials(dcreds),

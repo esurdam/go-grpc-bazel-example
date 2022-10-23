@@ -13,7 +13,7 @@ In this case, `helloworld` will be implemented in `pkg`.
 - [Development](#development)
 - [Generating BUILD.bazel files](#generating-build-files)
 - [Generating proto files](#generating-proto-files-(development))
-- [Test locally](#test-repo)
+- [Test locally](#testing)
 - [Running locally](#running-service-locally)
 - [Swagger + JSON Gateway](#swagger--json-gateway)
 - [Deployment](#deployment)
@@ -102,7 +102,7 @@ are only necessary for local development. Otherwise, Bazel will handle generatin
 make link
 ```
 
-## Test repo
+## Testing
 
 To run all tests:
 
@@ -127,12 +127,14 @@ Tests can also be aggregated into test groups to be tested at once.
 Generate a self-signed certificate (cert.pem & key.pem) to run services locally. 
 Required for multiplexing grpc/http2 over single port. You can add any other hostnames as necessary.
 
+### TLS
 ```bash
 mkdir -p ssl && \
   (cd ssl && \
-    go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,localhost,localhost:443,localhost:4443 --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h)
+    go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits 2048 --host 127.0.0.1,::1,localhost,localhost:443,localhost:4443 --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h)
 ```
 
+### Running
 ```bash
 bazel run //services/helloworld:helloworld -- -http-port 4443 -cert $(pwd)/ssl/cert.pem -key $(pwd)/ssl/key.pem
 ```
