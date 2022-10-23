@@ -124,14 +124,23 @@ Tests can also be aggregated into test groups to be tested at once.
 
 ## Running service locally
 
+Generate a self-signed certificate (cert.pem & key.pem) to run services locally. 
+Required for multiplexing grpc/http2 over single port. You can add any other hostnames as necessary.
+
 ```bash
-bazel run //services/helloworld:helloworld -- -port 9000 -http-port 10000
+mkdir -p ssl && \
+  (cd ssl && \
+    go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,localhost,localhost:443,localhost:4443 --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h)
+```
+
+```bash
+bazel run //services/helloworld:helloworld -- -http-port 4443 -cert $(pwd)/ssl/cert.pem -key $(pwd)/ssl/key.pem
 ```
 
 Then we use cURL to send HTTP requests:
 
 ```bash
-curl -X POST -k http://localhost:10000/v1/greeter -d '{"name": "TestName"}'
+curl -X POST -k https://localhost:4443/v1/greeter -d '{"name": "TestName"}
 ```
 
 ```json
@@ -140,26 +149,28 @@ curl -X POST -k http://localhost:10000/v1/greeter -d '{"name": "TestName"}'
 }
 ```
 
-You can view the swagger at [http://localhost:10000/swagger.json](http://localhost:10000/swagger.json)
+You can view the swagger at [https://localhost:4443/swagger.json](https://localhost:4443/swagger.json)
 
 ### Client
 
 With the server running, you can test command line tools from `cmd`. 
 ```text
-$ bazel run //cmd/helloworld-client -- --name "Test Name" --server-addr :900
-0
+$ bazel run //cmd/helloworld-client -- \
+    --name "Test Name" \
+    --server-addr localhost:4443 \
+    --cert $(pwd)/ssl/cert.pem
 
-INFO: Analyzed target //cmd/helloworld-client:helloworld-client (1 packages loaded, 3 targets configured).
+INFO: Analyzed target //cmd/helloworld-client:helloworld-client (0 packages loaded, 0 targets configured).
 INFO: Found 1 target...
 Target //cmd/helloworld-client:helloworld-client up-to-date:
   bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client
-INFO: Elapsed time: 0.327s, Critical Path: 0.10s
-INFO: 2 processes: 1 internal, 1 darwin-sandbox.
-INFO: Build completed successfully, 2 total actions
-INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-clien
-INFO: Build completed successfully, 2 total actions
+INFO: Elapsed time: 0.365s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client --name 'Test Name' --server-addr localhost:4443 --cert ...
+INFO: Build completed successfully, 1 total action
 
-2022/06/26 02:29:31 message:"Hello Test Name!"
+2022/10/22 18:03:59 message:"Hello Test Name!"
 ```
 
 ### Running with Docker locally
@@ -182,7 +193,7 @@ bazel run \
   --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
   //services/helloworld:docker \
-  -- --port 9000 --http-port 10000
+  -- --http-port 4443 --cert $(pwd)/ssl/cert.pem --key $(pwd)/ssl/key.pem
 ```
 
 ## Swagger + JSON Gateway
