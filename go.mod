@@ -3,10 +3,10 @@ module github.com/AdGreetz/go-grpc-bazel-example
 go 1.18
 
 require (
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.12.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0
 	github.com/philip-bui/grpc-zerolog v1.0.1
 	golang.org/x/tools v0.1.12
-	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55
+	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
