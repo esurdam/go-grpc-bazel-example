@@ -12,3 +12,11 @@ filegroup(
     name = "coverage_files",
     srcs = glob(["bazel-out/**/coverage.dat"]),
 )
+
+filegroup(
+    name = "build_all",
+    srcs = [
+        "//cmd/helloworld-client",
+        "//services/helloworld",
+    ],
+)

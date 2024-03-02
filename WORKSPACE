@@ -60,9 +60,8 @@ go_deps()
 gazelle_dependencies()
 
 # ================================================================
-# Docker support requires rules_docker and custom docker rules
+# Docker support requires rules_oci and custom rules
 # ================================================================
-
 http_archive(
     name = "rules_oci",
     sha256 = "4a276e9566c03491649eef63f27c2816cc222f41ccdebd97d2c5159e84917c3b",
@@ -128,14 +127,6 @@ k8s_defaults(
     kind = "deployment",
     namespace = "$(namespace)",
 )
-
-# We use go_image to build a sample service
-load(
-    "@io_bazel_rules_docker//go:image.bzl",
-    _go_image_repos = "repositories",
-)
-
-_go_image_repos()
 
 # gazelle:repo bazel_gazelle
 

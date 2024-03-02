@@ -2,7 +2,7 @@
 # This script is used to test the repo
 
 env GO111MODULE=on
-BUILDIFIER_VERSION="5.1.0"
+BUILDIFIER_VERSION="5.4.0"
 
 which buildifier >/dev/null
 if [ $? -ne 0 ]; then

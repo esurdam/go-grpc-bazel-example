@@ -2,7 +2,7 @@
 .DEFAULT_GOAL = help
 
 build: ## Build services
-	bash ci/build-service.sh
+	bazel build :build_all
 
 coverage: ## Generate coverage report
 	bash ci/coverage.sh
