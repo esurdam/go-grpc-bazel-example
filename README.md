@@ -37,6 +37,7 @@ WORKSPACE    # bazel workspace rules; external code
 
 `Go` and `Bazel` are the only two requirements.
 
+This example uses bazel version 5.4.0.
 [Install Bazel](https://docs.bazel.build/versions/master/install.html)
 
 ## Create a new service
@@ -122,14 +123,20 @@ gateway_openapiv2_compile(
 )
 ```
 
-Services can then use the `go_embed_data` rule to embed the `swagger.json` compiled output.
+Services can then add the src to the `embedsrcs` rule.
 
 ```
 # Embeds the swagger json as var "Data"
-go_embed_data(
-    name = "static_assets",
-    src = "//pb/helloworld:helloworld_gateway_grpc",
-    package = "main",
+go_library(
+    name = "helloworld_lib",
+    srcs = [
+        "data.go",
+        "main.go",
+    ],
+    embedsrcs = [
+        "//pb/helloworld:helloworld_openapi_swagger",
+    ],
+    ...
 )
 ```
 
@@ -239,6 +246,34 @@ INFO: Build completed successfully, 1 total action
 
 ### Running with Docker locally
 
+Each service should contain a `tarball` rule, which builds the binary in a tarball:
+```
+oci_tarball(
+    name = "tarball",    
+    image = ":image",
+    repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest"],
+)
+```
+For example, to build the tarball in amd64:
+```bash
+bazel build \
+  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+  --cpu=k8 \
+  --sandbox_block_path=/usr/local \
+  //services/helloworld:tarball
+# Load the tarball into docker
+docker load --input bazel-bin/services/helloworld/tarball/tarball.tar
+docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest --http-port 4443 --cert /ssl/cert.pem --key /ssl/key.pem
+```
+arm example:
+```bash
+bazel build \
+  --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 \
+  --cpu=arm64 \
+  --sandbox_block_path=/usr/local \
+  //services/helloworld:tarball 
+```
+
 Each service should contain a `docker` rule, which builds the binary in a docker image:
 
 ```
@@ -312,6 +347,7 @@ bazel run \
             --define cluster="$CLUSTER" \
             --define namespace="$NAMESPACE" \
             --define env="$ENV" \
+            --sandbox_block_path=/usr/local \
             --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
             --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
             --cpu=k8 \
@@ -322,15 +358,14 @@ bazel run \
 
 Used to deploy a service to the container registry.
 
-Each service should contain a `docker_push` rule, which defines the container registry and path.
+Each service should contain a `oci_push` rule, which defines the container registry and path.
 
 ```
-docker_push(
+oci_push(
     name = "push",
-    image = ":docker",
-    registry = "ghcr.io",
-    repository = "adgreetz/go-grpc-bazel-example/services/helloworld",
-    tag = "$(version)",
+    image = ":image",
+    remote_tags = ["$(version)"],
+    repository = "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld",
 )
 ```
 
@@ -338,9 +373,10 @@ To push an individual service (where version is the container label):
 
 ```bash
 bazel run \
-  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \ 
+  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
   --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
+  --sandbox_block_path=/usr/local \
   //services/helloworld:push
 ```
 

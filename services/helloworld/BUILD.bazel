@@ -1,12 +1,19 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_embed_data", "go_library")
-load("@io_bazel_rules_docker//go:image.bzl", "go_image")
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@k8s_deploy//:defaults.bzl", "k8s_deploy")
 
 go_library(
     name = "helloworld_lib",
-    srcs = ["main.go"],
-    embed = [":static_assets"],
+    srcs = [
+        "data.go",
+        "main.go",
+    ],
+    embedsrcs = [
+        "//pb/helloworld:helloworld_openapi_swagger",
+    ],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
@@ -25,28 +32,45 @@ go_binary(
     visibility = ["//visibility:public"],
 )
 
-# Manually defined
-# Embeds the swagger json as var "Data"
-go_embed_data(
-    name = "static_assets",
-    src = "//pb/helloworld:helloworld_openapi_swagger",
-    package = "main",
+# Put app go_binary into a tar layer.
+pkg_tar(
+    name = "app_layer",
+    srcs = [":helloworld"],
+    # If the binary depends on RUNFILES, uncomment the attribute below.
+    # include_runfiles = True
 )
 
-go_image(
-    name = "docker",
-    embed = [
-        ":helloworld_lib",
-    ],
-    visibility = ["//visibility:public"],
+oci_image(
+    name = "image",
+    base = "@distroless_base",
+    entrypoint = ["/helloworld"],
+    tars = [":app_layer"],
 )
 
-docker_push(
+platform_transition_filegroup(
+    name = "transitioned_image",
+    srcs = [":image"],
+    target_platform = select({
+        "@platforms//cpu:arm64": "@io_bazel_rules_go//go/toolchain:linux_arm64",
+        "@platforms//cpu:x86_64": "@io_bazel_rules_go//go/toolchain:linux_amd64",
+    }),
+)
+
+# $ bazel build :tarball
+# $ docker load --input $(bazel cquery --output=files :tarball)
+# $ docker run --rm gcr.io/example:latest
+oci_tarball(
+    name = "tarball",
+    # Use the image built for the exec platform rather than the target platform
+    image = ":image",
+    repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest"],
+)
+
+oci_push(
     name = "push",
-    image = ":docker",
-    registry = "ghcr.io",
-    repository = "adgreetz/go-grpc-bazel-example/services/helloworld",
-    tag = "$(version)",
+    image = ":image",
+    remote_tags = ["latest"],
+    repository = "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld",
 )
 
 k8s_deploy(

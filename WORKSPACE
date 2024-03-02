@@ -14,9 +14,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_proto_grpc",
-    sha256 = "507e38c8d95c7efa4f3b1c0595a8e8f139c885cb41a76cab7e20e4e67ae87731",
-    strip_prefix = "rules_proto_grpc-4.1.1",
-    urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/archive/4.1.1.tar.gz"],
+    sha256 = "c0d718f4d892c524025504e67a5bfe83360b3a982e654bc71fed7514eb8ac8ad",
+    strip_prefix = "rules_proto_grpc-4.6.0",
+    urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/archive/4.6.0.tar.gz"],
 )
 
 # Example: https://github.com/rules-proto-grpc/rules_proto_grpc/blob/master/example/grpc-gateway/gateway_grpc_library/WORKSPACE
@@ -42,7 +42,7 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 go_rules_dependencies()
 
 go_register_toolchains(
-    version = "1.18.2",
+    version = "1.20.7",
 )
 
 bazel_gazelle()
@@ -50,10 +50,6 @@ bazel_gazelle()
 load("@rules_proto_grpc//grpc-gateway:repositories.bzl", rules_proto_grpc_gateway_repos = "gateway_repos")
 
 rules_proto_grpc_gateway_repos()
-
-load("@grpc_ecosystem_grpc_gateway//:repositories.bzl", "go_repositories")
-
-go_repositories()
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 load("//:go.bzl", "go_deps")
@@ -67,28 +63,39 @@ gazelle_dependencies()
 # Docker support requires rules_docker and custom docker rules
 # ================================================================
 
-# Download the rules_docker repository at release v0.12.1
-# https://github.com/bazelbuild/rules_docker
 http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "59536e6ae64359b716ba9c46c39183403b01eabfbd57578e84398b4829ca499a",
-    strip_prefix = "rules_docker-0.22.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.22.0/rules_docker-v0.22.0.tar.gz"],
+    name = "rules_oci",
+    sha256 = "4a276e9566c03491649eef63f27c2816cc222f41ccdebd97d2c5159e84917c3b",
+    strip_prefix = "rules_oci-1.7.4",
+    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.4/rules_oci-v1.7.4.tar.gz",
 )
 
-# This is NOT needed when going through the language lang_image
-# "repositories" function(s).
+load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
 
-load(
-    "@io_bazel_rules_docker//repositories:repositories.bzl",
-    container_repositories = "repositories",
+rules_oci_dependencies()
+
+load("@rules_oci//oci:repositories.bzl", "LATEST_CRANE_VERSION", "oci_register_toolchains")
+
+oci_register_toolchains(
+    name = "oci",
+    crane_version = LATEST_CRANE_VERSION,
+    # Uncommenting the zot toolchain will cause it to be used instead of crane for some tasks.
+    # Note that it does not support docker-format images.
+    # zot_version = LATEST_ZOT_VERSION,
 )
 
-container_repositories()
+# You can pull your base images using oci_pull like this:
+load("@rules_oci//oci:pull.bzl", "oci_pull")
 
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps()
+oci_pull(
+    name = "distroless_base",
+    digest = "sha256:ccaef5ee2f1850270d453fdf700a5392534f8d1a8ca2acda391fbb6a06b81c86",
+    image = "gcr.io/distroless/base",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
 
 # This requires rules_docker to be fully instantiated before
 # it is pulled in.
@@ -130,10 +137,6 @@ load(
 
 _go_image_repos()
 
-load("@io_bazel_rules_go//extras:embed_data_deps.bzl", "go_embed_data_dependencies")
-
-go_embed_data_dependencies()
-
 # gazelle:repo bazel_gazelle
 
 # Golink for Gazelle
@@ -142,4 +145,13 @@ http_archive(
     sha256 = "ea728cfc9cb6e2ae024e1d5fbff185224592bbd4dad6516f3cc96d5155b69f0d",
     strip_prefix = "golink-1.0.0",
     urls = ["https://github.com/nikunjy/golink/archive/v1.0.0.tar.gz"],
+)
+
+http_archive(
+    name = "rules_license",
+    sha256 = "241b06f3097fd186ff468832150d6cc142247dc42a32aaefb56d0099895fd229",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_license/releases/download/0.0.8/rules_license-0.0.8.tar.gz",
+        "https://github.com/bazelbuild/rules_license/releases/download/0.0.8/rules_license-0.0.8.tar.gz",
+    ],
 )
