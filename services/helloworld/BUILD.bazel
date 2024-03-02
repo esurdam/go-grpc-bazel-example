@@ -13,6 +13,7 @@ go_embed_data(
 go_library(
     name = "helloworld_lib",
     srcs = ["main.go"],
+    embed = [":static_assets"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [

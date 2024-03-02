@@ -21,8 +21,7 @@ go_proto_library(
 
 go_library(
     name = "helloworld",
-    srcs = ["helloworld.pb.gw.go"],
-    embed = [":helloworld_go_proto"],
+    embed = [":helloworld_gateway_proto"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
     visibility = ["//visibility:public"],
     deps = [
