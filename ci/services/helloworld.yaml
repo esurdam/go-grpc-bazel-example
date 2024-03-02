@@ -20,10 +20,10 @@ spec:
         prometheus.io/scrape: 'true'
     spec:
       imagePullSecrets:
-        - name: goog-key1
+        - name: dockerconfigjson-github-com
       containers:
         - name: helloworld-container
-          image: services/helloworld:latest
+          image: {{IMAGE_TAG}}
           ports:
             - containerPort: 443
           imagePullPolicy: Always
@@ -45,7 +45,7 @@ spec:
               port: 443
           env:
             - name: DEPLOY
-              value: VERSION
+              value: {{VERSION}}
             - name: ENV
               valueFrom:
                 fieldRef:

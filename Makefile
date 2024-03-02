@@ -1,5 +1,6 @@
 .PHONY: build clean gazelle help link fmt test coverage upgrade _godeps
 .DEFAULT_GOAL = help
+VERSION ?= $(shell openssl rand -base64 8 |md5 |head -c8)
 
 build: ## Build services
 	bazel build :build_all
@@ -17,6 +18,10 @@ gazelle: ## Run link, go mod and gazelle
 
 link: ## Link bazel build proto to local
 	bash ci/link.sh
+
+.PHONY: push
+push:
+	bash ci/push-service.sh
 
 test: ## Run test
 	bash ci/test.sh
