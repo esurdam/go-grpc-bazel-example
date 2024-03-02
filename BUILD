@@ -1,9 +1,4 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_bundle")
-load(
-    "@io_bazel_rules_docker//contrib:push-all.bzl",
-    docker_pushall = "docker_push",
-)
 
 package(default_visibility = ["@//visibility:public"])
 
@@ -16,17 +11,4 @@ gazelle(
 filegroup(
     name = "coverage_files",
     srcs = glob(["bazel-out/**/coverage.dat"]),
-)
-
-docker_bundle(
-    name = "bundle",
-    images = {
-        "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:{BUILD_USER}": "//services/helloworld:docker",
-        "ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client:{BUILD_USER}": "//cmd/helloworld-client:docker",
-    },
-)
-
-docker_pushall(
-    name = "push",
-    bundle = ":bundle",
 )

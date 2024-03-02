@@ -35,8 +35,6 @@ go_binary(
 pkg_tar(
     name = "app_layer",
     srcs = [":helloworld"],
-    # If the binary depends on RUNFILES, uncomment the attribute below.
-    # include_runfiles = True
 )
 
 oci_image(
@@ -55,8 +53,7 @@ platform_transition_filegroup(
     }),
 )
 
-# $ bazel build :tarball
-# $ docker load --input $(bazel cquery --output=files :tarball)
+# $ bazel run :tarball
 # $ docker run --rm gcr.io/example:latest
 oci_tarball(
     name = "tarball",

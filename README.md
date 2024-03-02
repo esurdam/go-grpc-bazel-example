@@ -265,10 +265,7 @@ docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/adgreetz/go-grpc-bazel-e
 ```
 arm example:
 ```bash
- bazel run \
-  --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 \
-  --cpu=arm64 \
-  //services/helloworld:tarball
+ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 //services/helloworld:tarball
 ```
 
 Each service should contain a `docker` rule, which builds the binary in a docker image:
@@ -385,6 +382,7 @@ GRPC
 
 Bazelbuild rules
 
+- [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main)
 - [rules_docker](https://github.com/bazelbuild/rules_docker)
 - [rules_go](https://github.com/bazelbuild/rules_go)
 - [rules_k8s](https://github.com/bazelbuild/rules_k8s)
