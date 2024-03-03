@@ -8,6 +8,9 @@ build: ## Build services
 coverage: ## Generate coverage report
 	bash ci/coverage.sh
 
+deploy: ## Deploy services to k8s
+	bash ci/deploy.sh
+
 fmt: ## Run build-fmt
 	bash ci/build-fmt.sh
 
@@ -20,7 +23,7 @@ link: ## Link bazel build proto to local
 	bash ci/link.sh
 
 .PHONY: push
-push:
+push: ## Push all 'push' to registry
 	bash ci/push-service.sh
 
 test: ## Run test
