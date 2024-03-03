@@ -37,6 +37,7 @@ WORKSPACE    # bazel workspace rules; external code
 
 `Go` and `Bazel` are the only two requirements.
 
+This example uses bazel version 5.4.0.
 [Install Bazel](https://docs.bazel.build/versions/master/install.html)
 
 ## Create a new service
@@ -133,7 +134,7 @@ go_embed_data(
 )
 ```
 
-Services can then expose the `swagger.json` file directly. 
+Services can then expose the `swagger.json` file directly.
 
 # Development
 
@@ -222,7 +223,7 @@ With the server running, you can test command line tools from `cmd`.
 $ bazel run //cmd/helloworld-client -- \
     --name "Test Name" \
     --server-addr localhost:4443 \
-    --cert $(pwd)/ssl/cert.pem
+    --ca-cert $(pwd)/ssl/cert.pem
 
 INFO: Analyzed target //cmd/helloworld-client:helloworld-client (0 packages loaded, 0 targets configured).
 INFO: Found 1 target...
@@ -239,25 +240,26 @@ INFO: Build completed successfully, 1 total action
 
 ### Running with Docker locally
 
-Each service should contain a `docker` rule, which builds the binary in a docker image:
-
+Each service should contain a `tarball` rule, which builds the binary in a tarball:
 ```
-go_image(
-    name = "docker",
-    embed = [
-        ":helloworld_lib",
-    ],
+oci_tarball(
+    name = "tarball",    
+    image = ":image",
+    repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest"],
 )
 ```
-
-To run the binary in docker:
-
+For example, to build the tarball in amd64:
 ```bash
 bazel run \
   --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
-  //services/helloworld:docker \
-  -- --http-port 4443 --cert $(pwd)/ssl/cert.pem --key $(pwd)/ssl/key.pem
+  //services/helloworld:tarball
+# Load the tarball into docker
+docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest --http-port 4443 --cert /ssl/cert.pem --key /ssl/key.pem
+```
+arm example:
+```bash
+ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 //services/helloworld:tarball
 ```
 
 # Deployment
@@ -268,69 +270,18 @@ CI checks for formatting; ensure formatting with `make fmt`
 make fmt
 ```
 
-## Kubernetes
-
-Each service should contain a `k8s_deploy` rule, which defines the cluster deployment.
-
-This rule builds the binary in Docker, pushes the image to the container registry, and deploys the service to the
-defined Kubernetes cluster.
-
-```
-k8s_deploy(
-    name = "k8s",
-    images = {
-        "services/helloworld:latest": "//services/helloworld:docker",
-    },
-    template = "//ci/services:helloworld.yaml",
-)
-```
-
-Each service is expected to have an exported yaml file for configuration exposed in the `ci/services` directory.
-
-* Each service should mount its own tls via kubernetes secrets, not included in this example repo
-
-To deploy services to k8s (local example):
-
-```bash
-SERVICE="helloworld"
-export ENV="dev"
-
-CLUSTER="docker-for-desktop-cluster"
-NAMESPACE="development"
-export PUSH_REPO="localhost:5000"
-
-echo "deploying environment..."
-echo "ENV: $ENV"
-echo "NAMESPACE: $NAMESPACE"
-echo "CLUSTER: $CLUSTER"
-echo "SERVICE: $SERVICE"
-echo "PUSH_REPO: $PUSH_REPO"
-
-bazel run \
-            --stamp \
-            --workspace_status_command=./ci/status.sh \
-            --define cluster="$CLUSTER" \
-            --define namespace="$NAMESPACE" \
-            --define env="$ENV" \
-            --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
-            --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
-            --cpu=k8 \
-            "//services/helloworld:k8s.apply"
-```
-
 ## Pushing service to container registry
 
 Used to deploy a service to the container registry.
 
-Each service should contain a `docker_push` rule, which defines the container registry and path.
+Each service should contain a `oci_push` rule, which defines the container registry and path.
 
 ```
-docker_push(
+oci_push(
     name = "push",
-    image = ":docker",
-    registry = "ghcr.io",
-    repository = "adgreetz/go-grpc-bazel-example/services/helloworld",
-    tag = "$(version)",
+    image = ":image",
+    remote_tags = ["$(version)"],
+    repository = "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld",
 )
 ```
 
@@ -338,10 +289,23 @@ To push an individual service (where version is the container label):
 
 ```bash
 bazel run \
-  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \ 
+  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
   --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
   //services/helloworld:push
+```
+
+## Kubernetes
+
+Since [rules_docker](https://github.com/bazelbuild/rules_docker?) has been deprecated, we can no longer use the `k8s_deploy` rule to deploy to k8s. Instead, we can use the `oci_push` rule to push the image to the container registry, and then use `kubectl` to apply the deployment.
+
+```bash
+bazel run --stamp \
+  --workspace_status_command=./ci/status.sh \
+  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
+  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+  --cpu=k8 //services/helloworld:push
+kubectl apply -f ci/services/helloworld.yaml
 ```
 
 # Useful Links
@@ -352,6 +316,7 @@ GRPC
 
 Bazelbuild rules
 
+- [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main)
 - [rules_docker](https://github.com/bazelbuild/rules_docker)
 - [rules_go](https://github.com/bazelbuild/rules_go)
 - [rules_k8s](https://github.com/bazelbuild/rules_k8s)
