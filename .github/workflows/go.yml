@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-${{ env.cache-name }}-main
 
       - name: Test
-        run: go get ./... && make test
+        run: make test
 
       - name: Build
         run: make build
