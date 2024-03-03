@@ -1,6 +1,6 @@
 module github.com/AdGreetz/go-grpc-bazel-example
 
-go 1.19
+go 1.20
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
