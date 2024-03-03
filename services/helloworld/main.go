@@ -11,7 +11,10 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
 	"github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server"
@@ -119,6 +122,30 @@ func main() {
 			NextProtos:   []string{"h2"},
 		},
 	}
-	log.Printf("serving at https://%s\n", addr)
-	log.Fatalln(gwServer.Serve(tls.NewListener(conn, gwServer.TLSConfig)))
+	go func() {
+		log.Printf("serving at https://%s\n", addr)
+		if err := gwServer.Serve(tls.NewListener(conn, gwServer.TLSConfig)); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal, 1)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("shutting down server...")
+
+	// The context is used to inform the server it has 5 seconds to finish
+	// the request it is currently handling
+	ctxClos, cancelClose := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelClose()
+	if err := gwServer.Shutdown(ctxClos); err != nil {
+		log.Fatal("server forced to shutdown:", err)
+	}
+
+	log.Println("server exiting")
 }
