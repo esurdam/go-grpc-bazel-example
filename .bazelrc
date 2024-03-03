@@ -1,0 +1,4 @@
+build --stamp
+build --workspace_status_command=./ci/status.sh
+run --stamp
+run --workspace_status_command=./ci/status.sh
