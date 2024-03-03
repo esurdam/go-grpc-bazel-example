@@ -287,26 +287,31 @@ oci_push(
 
 To push an individual service (where version is the container label):
 
+Iterates through all `:push` targets and pushes to the container registry.
 ```bash
-bazel run \
-  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
+make push
+```
+
+e.g.
+```bash
+bazel run \  
   --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
   //services/helloworld:push
 ```
 
+See [ci/push-service.sh](ci/push-service.sh)
+
 ## Kubernetes
 
 Since [rules_docker](https://github.com/bazelbuild/rules_docker?) has been deprecated, we can no longer use the `k8s_deploy` rule to deploy to k8s. Instead, we can use the `oci_push` rule to push the image to the container registry, and then use `kubectl` to apply the deployment.
 
+Iterates through all `:push` targets, uses the stamp to update the image tag and applies the k8s deployment.
 ```bash
-bazel run --stamp \
-  --workspace_status_command=./ci/status.sh \
-  --define version="$(openssl rand -base64 8 |md5 |head -c8)" \
-  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
-  --cpu=k8 //services/helloworld:push
-kubectl apply -f ci/services/helloworld.yaml
+make deploy
 ```
+
+See [ci/deploy.sh](ci/deploy.sh)
 
 # Useful Links
 
