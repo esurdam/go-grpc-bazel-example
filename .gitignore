@@ -2,6 +2,7 @@ bazel-*
 .idea
 .vscode
 .DS_Store
+.ijwb
 
 coverage.html
 coverage.txt

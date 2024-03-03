@@ -86,11 +86,3 @@ oci_push(
     remote_tags = ":stamped",
     repository = "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld",
 )
-
-#k8s_deploy(
-#    name = "k8s",
-#    images = {
-#        "services/helloworld:latest": "//services/helloworld:docker",
-#    },
-#    template = "//ci/services:helloworld.yaml",
-#)
