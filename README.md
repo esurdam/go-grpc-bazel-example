@@ -123,15 +123,13 @@ gateway_openapiv2_compile(
 )
 ```
 
-Services can then use the `go_embed_data` rule to embed the `swagger.json` compiled output.
+Services can then use the `embed` rule to embed the `swagger.json` compiled output.
+
+View the `genrule` in [BUILD.bazel](services/helloworld/BUILD.bazel)
 
 ```
-# Embeds the swagger json as var "Data"
-go_embed_data(
-    name = "static_assets",
-    src = "//pb/helloworld:helloworld_gateway_grpc",
-    package = "main",
-)
+//go:embed helloworld_openapi_swagger.json
+var Data []byte
 ```
 
 Services can then expose the `swagger.json` file directly.

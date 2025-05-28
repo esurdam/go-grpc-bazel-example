@@ -5,7 +5,7 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 
-
+# This is used to embed the swagger.json file into the go binary
 genrule(
     name = "hellodata",
     srcs = ["//pb/helloworld:helloworld_openapi_swagger"],
