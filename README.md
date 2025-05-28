@@ -251,7 +251,7 @@ oci_tarball(
 For example, to build the tarball in amd64:
 ```bash
 bazel run \
-  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+  --platforms=@rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
   //services/helloworld:tarball
 # Load the tarball into docker
@@ -259,7 +259,7 @@ docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/adgreetz/go-grpc-bazel-e
 ```
 arm example:
 ```bash
- bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 //services/helloworld:tarball
+ bazel run --platforms=@rules_go//go/toolchain:linux_arm64 //services/helloworld:tarball
 ```
 
 # Deployment
