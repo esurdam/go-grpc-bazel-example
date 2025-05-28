@@ -10,7 +10,7 @@ genrule(
     name = "hellodata",
     srcs = ["//pb/helloworld:helloworld_openapi_swagger"],
     outs = ["helloworld_openapi_swagger.json"],
-    cmd = "cat $(SRCS) | tr A-Za-z N-ZA-Mn-za-m > $@",
+    cmd = "cat $(SRCS) > $@",
 )
 
 go_library(
