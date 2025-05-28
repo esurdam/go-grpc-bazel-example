@@ -20,3 +20,11 @@ filegroup(
         "//services/helloworld",
     ],
 )
+
+filegroup(
+    name = "push_all",
+    srcs = [
+        "//cmd/helloworld-client:push",
+        "//services/helloworld:push",
+    ],
+)

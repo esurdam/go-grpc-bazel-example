@@ -55,3 +55,4 @@ use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base
 
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_proto_grpc_grpc_gateway", version = "5.1.0")
+bazel_dep(name = "platforms", version = "1.0.0")

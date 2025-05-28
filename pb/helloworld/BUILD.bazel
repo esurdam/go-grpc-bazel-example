@@ -1,8 +1,7 @@
 load("@rules_go//go:def.bzl", "go_library")
 load("@rules_go//proto:def.bzl", "go_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@rules_proto_grpc_grpc_gateway//:defs.bzl", "gateway_grpc_compile", "gateway_openapiv2_compile")
-load("@rules_proto_grpc_grpc_gateway//:defs.bzl", "gateway_grpc_library")
+load("@rules_proto_grpc_grpc_gateway//:defs.bzl", "gateway_grpc_library", "gateway_openapiv2_compile")
 
 proto_library(
     name = "helloworld_proto",
@@ -11,13 +10,21 @@ proto_library(
     deps = ["@googleapis//google/api:annotations_proto"],
 )
 
+# This is unused, but to demostrate the use of go_proto_library
 go_proto_library(
     name = "helloworld_go_proto",
     compilers = ["@rules_go//proto:go_grpc"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
     proto = ":helloworld_proto",
     visibility = ["//visibility:public"],
-    deps = ["@go_googleapis//google/api:annotations_go_proto"]
+    deps = ["@org_golang_google_genproto_googleapis_api//annotations"],
+)
+
+gateway_grpc_library(
+    name = "helloworld_gateway_proto",
+    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
+    protos = [":helloworld_proto"],
+    visibility = ["//visibility:public"],
 )
 
 go_library(
@@ -28,22 +35,14 @@ go_library(
     deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
         "@com_github_grpc_ecosystem_grpc_gateway_v2//utilities",
+        "@org_golang_google_genproto_googleapis_api//annotations",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//codes",
         "@org_golang_google_grpc//grpclog",
         "@org_golang_google_grpc//metadata",
         "@org_golang_google_grpc//status",
-        "@org_golang_google_genproto_googleapis_api//annotations",
         "@org_golang_google_protobuf//proto",
     ],
-)
-
-### Manually defined
-gateway_grpc_library(
-    name = "helloworld_gateway_proto",
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
-    protos = [":helloworld_proto"],
-    visibility = ["//visibility:public"],
 )
 
 gateway_openapiv2_compile(

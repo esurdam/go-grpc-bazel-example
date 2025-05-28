@@ -4,14 +4,17 @@ go_library(
     name = "server",
     srcs = ["server.go"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server",
+    visibility = ["//visibility:public"],
     deps = [
         "//pb/helloworld",
     ],
-    visibility = ["//visibility:public"],
 )
 
 go_test(
     name = "server_test",
     srcs = ["server_test.go"],
-    deps = [":server"],
+    deps = [
+        ":server",
+        "//pb/helloworld",
+    ],
 )

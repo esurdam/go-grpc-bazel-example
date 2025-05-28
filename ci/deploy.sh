@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script is used to create a coverage report
+# This script is used to deploy services to k8s
 
 env GO111MODULE=on
 
