@@ -15,9 +15,7 @@ fmt: ## Run build-fmt
 	bash ci/build-fmt.sh
 
 gazelle: ## Run link, go mod and gazelle
-	go mod tidy
 	bazel run //:gazelle -- update -build_tags=bazel
-	bazel run //:gazelle -- update-repos -from_file=go.mod -prune=true -build_file_proto_mode=disable -to_macro go.bzl%go_deps
 
 link: ## Link bazel build proto to local
 	bash ci/link.sh

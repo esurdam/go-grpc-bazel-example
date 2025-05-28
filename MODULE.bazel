@@ -10,7 +10,8 @@ module(
     version = "0.1.0",
 )
 
-bazel_dep(name = "rules_go", version = "0.48.1")
+bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1")
+bazel_dep(name = "rules_go", version = "0.54.0")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "gazelle", version = "0.43.0")
 bazel_dep(name = "rules_proto", version = "7.1.0")
@@ -25,11 +26,12 @@ go_deps.from_file(go_mod = "//:go.mod")
 # All *direct* Go dependencies of the module have to be listed explicitly.
 use_repo(
     go_deps,
-    "org_golang_google_grpc",
-    "org_golang_google_protobuf",
-    "org_golang_google_genproto_googleapis_api",
     "com_github_grpc_ecosystem_grpc_gateway_v2",
     "com_github_philip_bui_grpc_zerolog",
+    "org_golang_google_genproto_googleapis_api",
+    "org_golang_google_genproto",
+    "org_golang_google_grpc",
+    "org_golang_google_protobuf",
     "org_golang_x_tools",
 )
 
@@ -40,7 +42,10 @@ oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "distroless_base",
     image = "gcr.io/distroless/base",
-    platforms = ["linux/amd64", "linux/arm64/v8"],
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
     # 'latest' is not reproducible, but it's convenient.
     # During the build we print a WARNING message that includes recommended 'digest' and 'platforms'
     # values which you can use here in place of 'tag' to pin for reproducibility.
@@ -48,5 +53,5 @@ oci.pull(
 )
 use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64_v8")
 
-bazel_dep(name = "rules_license", version = "0.0.8")
+bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_proto_grpc_grpc_gateway", version = "5.1.0")

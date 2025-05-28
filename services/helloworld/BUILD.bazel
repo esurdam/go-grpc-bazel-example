@@ -5,12 +5,21 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 
+
+genrule(
+    name = "hellodata",
+    srcs = ["//pb/helloworld:helloworld_openapi_swagger"],
+    outs = ["helloworld_openapi_swagger.json"],
+    cmd = "cat $(SRCS) | tr A-Za-z N-ZA-Mn-za-m > $@",
+)
+
 go_library(
     name = "helloworld_lib",
     srcs = [
-        "data.go",
-        "main.go"
+        "main.go",  
+        "data.go",     
     ],
+    embedsrcs = [ ":hellodata"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [

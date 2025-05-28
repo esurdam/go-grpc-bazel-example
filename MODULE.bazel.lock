@@ -65,6 +65,10 @@
     "https://bcr.bazel.build/modules/gazelle/0.43.0/MODULE.bazel": "846e1fe396eefc0f9ddad2b33e9bd364dd993fc2f42a88e31590fe0b0eefa3f0",
     "https://bcr.bazel.build/modules/gazelle/0.43.0/source.json": "021a77f6625906d9d176e2fa351175e842622a5d45989312f2ad4924aab72df6",
     "https://bcr.bazel.build/modules/google_benchmark/1.8.2/MODULE.bazel": "a70cf1bba851000ba93b58ae2f6d76490a9feb74192e57ab8e8ff13c34ec50cb",
+    "https://bcr.bazel.build/modules/googleapis-rules-registry/1.0.0/MODULE.bazel": "97c6a4d413b373d4cc97065da3de1b2166e22cbbb5f4cc9f05760bfa83619e24",
+    "https://bcr.bazel.build/modules/googleapis-rules-registry/1.0.0/source.json": "cf611c836a60e98e2e2ab2de8004f119e9f06878dcf4ea2d95a437b1b7a89fe9",
+    "https://bcr.bazel.build/modules/googleapis/0.0.0-20241220-5e258e33.bcr.1/MODULE.bazel": "ee6c30f82ecd476e61f019fb1151aaab380ea419958ff274ef2f0efca7969f5c",
+    "https://bcr.bazel.build/modules/googleapis/0.0.0-20241220-5e258e33.bcr.1/source.json": "d6f66e3d95ec52821e994015e83ed194f8888c655068e192659e55a8987dfe77",
     "https://bcr.bazel.build/modules/googletest/1.11.0/MODULE.bazel": "3a83f095183f66345ca86aa13c58b59f9f94a2f81999c093d4eeaa2d262d12f4",
     "https://bcr.bazel.build/modules/googletest/1.14.0.bcr.1/MODULE.bazel": "22c31a561553727960057361aa33bf20fb2e98584bc4fec007906e27053f80c6",
     "https://bcr.bazel.build/modules/googletest/1.14.0/MODULE.bazel": "cfbcbf3e6eac06ef9d85900f64424708cc08687d1b527f0ef65aa7517af8118f",
@@ -130,7 +134,6 @@
     "https://bcr.bazel.build/modules/rules_go/0.41.0/MODULE.bazel": "55861d8e8bb0e62cbd2896f60ff303f62ffcb0eddb74ecb0e5c0cbe36fc292c8",
     "https://bcr.bazel.build/modules/rules_go/0.42.0/MODULE.bazel": "8cfa875b9aa8c6fce2b2e5925e73c1388173ea3c32a0db4d2b4804b453c14270",
     "https://bcr.bazel.build/modules/rules_go/0.46.0/MODULE.bazel": "3477df8bdcc49e698b9d25f734c4f3a9f5931ff34ee48a2c662be168f5f2d3fd",
-    "https://bcr.bazel.build/modules/rules_go/0.48.1/MODULE.bazel": "ad27296e268624d7d53043fe5ff88d5486e7a29596336f629b379b83c67e6d8b",
     "https://bcr.bazel.build/modules/rules_go/0.50.1/MODULE.bazel": "b91a308dc5782bb0a8021ad4330c81fea5bda77f96b9e4c117b9b9c8f6665ee0",
     "https://bcr.bazel.build/modules/rules_go/0.54.0/MODULE.bazel": "ebec39ed510d0d4122b60764623dda92ca7f175479b511bf7cd5de7f38e86747",
     "https://bcr.bazel.build/modules/rules_go/0.54.0/source.json": "6eb9b4f4fc27ab5be79d84dcfcf971beea6caa91a1b02088a9ee314c88915cf3",
@@ -1151,6 +1154,124 @@
             "rules_oci+",
             "bazel_skylib",
             "bazel_skylib+"
+          ]
+        ]
+      }
+    },
+    "@@rules_proto_grpc_grpc_gateway+//:module_extensions.bzl%download_plugins": {
+      "general": {
+        "bzlTransitiveDigest": "l1iBxygZakvBJ5fMxm9ufEngSaN4n0LIPmKnuxtKPCY=",
+        "usagesDigest": "R6pq5vZrRY88M+yklSAa+0LxdKChLCvuV+jau8/26Ag=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "grpc_gateway_plugin_darwin_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "407fc00c44151a140bce4cd42311ff67b5c8bf2b32eb0c42aae315310eea4a16",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-grpc-gateway-v2.26.3-darwin-arm64"
+            }
+          },
+          "grpc_gateway_plugin_darwin_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "5876b7b9c96149f8bd5847f4d91154b8902f9854eedbf1a7c5c1f1ebb10ff0c5",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-grpc-gateway-v2.26.3-darwin-x86_64"
+            }
+          },
+          "grpc_gateway_plugin_linux_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "c07ecc2f0ea723b1a8e92281c3d3f37289ee0fc29fbd2219f3fdf7f974233e94",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-grpc-gateway-v2.26.3-linux-arm64"
+            }
+          },
+          "grpc_gateway_plugin_linux_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "f7698dfa878b83d6a6387d03984afa419bed4b0c1439f1092db89034cd708318",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-grpc-gateway-v2.26.3-linux-x86_64"
+            }
+          },
+          "grpc_gateway_plugin_windows_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "1bede7d7047affd2d27fc8faba01e378acf12429f3c6aa5038bd3251fcd83193",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-grpc-gateway-v2.26.3-windows-arm64.exe"
+            }
+          },
+          "grpc_gateway_plugin_windows_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "f9cbf31c32f220e267262df49d6469b3b06219f8c032820117cd71550687ff7b",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-grpc-gateway-v2.26.3-windows-x86_64.exe"
+            }
+          },
+          "openapiv2_plugin_darwin_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "370a77b54e71ad38831332b98747b138bd45f54f01b2c54798f8e4069e0152a8",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-openapiv2-v2.26.3-darwin-arm64"
+            }
+          },
+          "openapiv2_plugin_darwin_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "5c5afb23e819a33c942ad1c888d7913c4d766434e2db1b96a92931e5c2d6dc5a",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-openapiv2-v2.26.3-darwin-x86_64"
+            }
+          },
+          "openapiv2_plugin_linux_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "488e64eb06165545e213efc1fd9e06196dc88c9e2344c4b2b0d8e7a09538bd6a",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-openapiv2-v2.26.3-linux-arm64"
+            }
+          },
+          "openapiv2_plugin_linux_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "a4eec19cfced95a71994c000f68b72038fba381a08266f0e9bb1931165a8aede",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-openapiv2-v2.26.3-linux-x86_64"
+            }
+          },
+          "openapiv2_plugin_windows_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "532f7ea5994ee4a4a5bf9d05b974273e7b1bf1c1cc0a69af3bbb28de85388781",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-openapiv2-v2.26.3-windows-arm64.exe"
+            }
+          },
+          "openapiv2_plugin_windows_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
+            "attributes": {
+              "executable": true,
+              "sha256": "6a3027cbc39c258c66625f1b32c2b9ffcc42910e21cef00378ca65c200a31f51",
+              "url": "https://github.com/grpc-ecosystem/grpc-gateway/releases/download/v2.26.3/protoc-gen-openapiv2-v2.26.3-windows-x86_64.exe"
+            }
+          }
+        },
+        "moduleExtensionMetadata": {
+          "useAllRepos": "REGULAR",
+          "reproducible": false
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "rules_proto_grpc_grpc_gateway+",
+            "bazel_tools",
+            "bazel_tools"
           ]
         ]
       }
