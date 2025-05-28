@@ -294,8 +294,7 @@ make push
 
 e.g.
 ```bash
-bazel run \  
-  --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+bazel run --platforms=@rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
   //services/helloworld:push
 ```

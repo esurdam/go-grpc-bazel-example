@@ -11,6 +11,7 @@ module(
 )
 
 bazel_dep(name = "rules_go", version = "0.48.1")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "gazelle", version = "0.43.0")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.5.0")
@@ -34,5 +35,18 @@ use_repo(
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_oci", version = "1.7.4")
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless_base",
+    image = "gcr.io/distroless/base",
+    platforms = ["linux/amd64", "linux/arm64/v8"],
+    # 'latest' is not reproducible, but it's convenient.
+    # During the build we print a WARNING message that includes recommended 'digest' and 'platforms'
+    # values which you can use here in place of 'tag' to pin for reproducibility.
+    tag = "latest",
+)
+use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64_v8")
+
 bazel_dep(name = "rules_license", version = "0.0.8")
 bazel_dep(name = "rules_proto_grpc_grpc_gateway", version = "5.1.0")
