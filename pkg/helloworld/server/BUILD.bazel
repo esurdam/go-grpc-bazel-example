@@ -1,18 +1,17 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "server",
     srcs = ["server.go"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server",
+    deps = [
+        "//pb/helloworld",
+    ],
     visibility = ["//visibility:public"],
-    deps = ["//pb/helloworld"],
 )
 
 go_test(
     name = "server_test",
     srcs = ["server_test.go"],
-    deps = [
-        ":server",
-        "//pb/helloworld",
-    ],
+    deps = [":server"],
 )

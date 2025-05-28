@@ -1,20 +1,16 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_embed_data", "go_library")
-load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
-
-go_embed_data(
-    name = "static_assets",
-    src = "//pb/helloworld:helloworld_openapi_swagger",
-    package = "main",
-)
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 
 go_library(
     name = "helloworld_lib",
-    srcs = ["main.go"],
-    embed = [":static_assets"],
+    srcs = [
+        "data.go",
+        "main.go",
+    ],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
@@ -22,7 +18,7 @@ go_library(
         "//pkg/helloworld/server",
         "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
         "@com_github_philip_bui_grpc_zerolog//:grpc-zerolog",
-        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//:grpc",
         "@org_golang_google_grpc//credentials",
     ],
 )
@@ -50,8 +46,8 @@ platform_transition_filegroup(
     name = "transitioned_image",
     srcs = [":image"],
     target_platform = select({
-        "@platforms//cpu:arm64": "@io_bazel_rules_go//go/toolchain:linux_arm64",
-        "@platforms//cpu:x86_64": "@io_bazel_rules_go//go/toolchain:linux_amd64",
+        "@platforms//cpu:arm64": "@rules_go//go/toolchain:linux_arm64",
+        "@platforms//cpu:x86_64": "@rules_go//go/toolchain:linux_amd64",
     }),
 )
 
