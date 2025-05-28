@@ -1,6 +1,6 @@
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball", "oci_push")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
@@ -45,15 +45,19 @@ platform_transition_filegroup(
     }),
 )
 
-# $ bazel run :tarball
+## $ bazel run //oci_go_image:load
 # $ docker run --rm gcr.io/example:latest
-oci_tarball(
-    name = "tarball",
-    # Use the image built for the exec platform rather than the target platform
-    image = ":image",
+#   string(
+# -       "Hello World",
+# +       "Hello Go",
+#   )
+oci_load(
+    name = "load",
+    # Use the image built for the target platform
+    image = ":transitioned_image",
     repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client:latest"],
-    visibility = ["//visibility:public"],
 )
+
 
 write_file(
     name = "tags_tmpl",
@@ -73,7 +77,7 @@ expand_template(
 
 oci_push(
     name = "push",
-    image = ":image",
+    image = ":transitioned_image",
     remote_tags = ":stamped",
     repository = "ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client",
     visibility = ["//visibility:public"],

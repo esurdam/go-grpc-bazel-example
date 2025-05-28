@@ -1,9 +1,10 @@
 load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
-load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@aspect_bazel_lib//lib:testing.bzl", "assert_archive_contains")
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
 
 # This is used to embed the swagger.json file into the go binary
 genrule(
@@ -38,16 +39,28 @@ go_binary(
     visibility = ["//visibility:public"],
 )
 
+
 # Put app go_binary into a tar layer.
 pkg_tar(
     name = "app_layer",
     srcs = {":helloworld": "helloworld"},
 )
 
+# Prove that the application is at the path we expect in that tar.
+assert_archive_contains(
+    name = "test_app_layer",
+    archive = "app_layer.tar",
+    expected = ["helloworld"],
+)
+
+#https://github.com/aspect-build/bazel-examples/blob/main/oci_go_image/BUILD.bazel  
 oci_image(
     name = "image",
     base = "@distroless_base",
     entrypoint = ["/helloworld"],
+    labels = {
+        "org.opencontainers.image.source": "https://github.com/AdGreetz/go-grpc-bazel-example",
+    },
     tars = [":app_layer"],
 )
 
@@ -59,15 +72,19 @@ platform_transition_filegroup(
         "@platforms//cpu:x86_64": "@rules_go//go/toolchain:linux_amd64",
     }),
 )
-
-# $ bazel run :tarball
+# $ bazel run //oci_go_image:load
 # $ docker run --rm gcr.io/example:latest
-oci_tarball(
-    name = "tarball",
-    # Use the image built for the exec platform rather than the target platform
-    image = ":image",
+#   string(
+# -       "Hello World",
+# +       "Hello Go",
+#   )
+oci_load(
+    name = "load",
+    # Use the image built for the target platform
+    image = ":transitioned_image",
     repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest"],
 )
+
 
 write_file(
     name = "tags_tmpl",
@@ -87,7 +104,7 @@ expand_template(
 
 oci_push(
     name = "push",
-    image = ":image",
+    image = ":transitioned_image",
     remote_tags = ":stamped",
     repository = "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:public"],
