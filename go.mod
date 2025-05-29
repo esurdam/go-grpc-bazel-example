@@ -1,4 +1,4 @@
-module github.com/AdGreetz/go-grpc-bazel-example
+module github.com/esurdam/go-grpc-bazel-example
 
 go 1.23.4
 

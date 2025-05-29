@@ -16,8 +16,8 @@ import (
 	"syscall"
 	"time"
 
-	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
-	"github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server"
+	pb "github.com/esurdam/go-grpc-bazel-example/pb/helloworld"
+	"github.com/esurdam/go-grpc-bazel-example/pkg/helloworld/server"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	zerolog "github.com/philip-bui/grpc-zerolog"
 	"google.golang.org/grpc"

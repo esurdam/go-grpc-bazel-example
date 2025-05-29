@@ -3,7 +3,7 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "server",
     srcs = ["server.go"],
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server",
+    importpath = "github.com/esurdam/go-grpc-bazel-example/pkg/helloworld/server",
     visibility = ["//visibility:public"],
     deps = [
         "//pb/helloworld:helloworld_gateway_proto",

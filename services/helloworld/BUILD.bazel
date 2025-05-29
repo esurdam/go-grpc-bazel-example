@@ -21,7 +21,7 @@ go_library(
         "main.go",
     ],
     embedsrcs = ["helloworld_openapi_swagger.json"],
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
+    importpath = "github.com/esurdam/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
         "//pb/helloworld:helloworld_gateway_proto",
@@ -59,7 +59,7 @@ oci_image(
     base = "@distroless_base",
     entrypoint = ["/helloworld"],
     labels = {
-        "org.opencontainers.image.source": "https://github.com/AdGreetz/go-grpc-bazel-example",
+        "org.opencontainers.image.source": "https://github.com/esurdam/go-grpc-bazel-example",
     },
     tars = [":app_layer"],
 )

@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
+	pb "github.com/esurdam/go-grpc-bazel-example/pb/helloworld"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

@@ -2,7 +2,7 @@ load("@gazelle//:def.bzl", "gazelle")
 
 package(default_visibility = ["@//visibility:public"])
 
-# gazelle:prefix github.com/AdGreetz/go-grpc-bazel-example
+# gazelle:prefix github.com/esurdam/go-grpc-bazel-example
 gazelle(
     name = "gazelle",
     external = "external",

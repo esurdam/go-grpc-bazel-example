@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
+	pb "github.com/esurdam/go-grpc-bazel-example/pb/helloworld"
 )
 
 // Server implements pb.GreeterServer

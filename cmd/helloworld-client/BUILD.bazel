@@ -8,7 +8,7 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 go_library(
     name = "helloworld-client_lib",
     srcs = ["main.go"],
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/cmd/helloworld-client",
+    importpath = "github.com/esurdam/go-grpc-bazel-example/cmd/helloworld-client",
     visibility = ["//visibility:private"],
     deps = [
         "//pb/helloworld:helloworld_go_proto",

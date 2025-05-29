@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	pb "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld"
-	"github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server"
+	pb "github.com/esurdam/go-grpc-bazel-example/pb/helloworld"
+	"github.com/esurdam/go-grpc-bazel-example/pkg/helloworld/server"
 )
 
 func TestServer_SayHello(t *testing.T) {
