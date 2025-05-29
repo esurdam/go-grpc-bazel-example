@@ -145,7 +145,9 @@ Run `make gazelle` to generate/update BUILD files (which include test and binari
 
 ### Generating Proto Files
 
-Generated files don't necessarily need to be checked in to repo. In this example, generated files are checked in. They are only necessary for local development. Otherwise, Bazel will handle generating the pb file during build.
+Use JetBrains/VSCode plugin to handle the Bazel workspace to not require local files for development. 
+
+Generated files don't necessarily need to be checked in to repo. Bazel will handle generating the pb file during build. 
 
 It is generally a good idea to track changes to pb in repo.
 
