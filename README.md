@@ -175,7 +175,7 @@ bazel test --features race \
   --verbose_failures \
   --test_output=errors \
   --action_env=CI=true \
-  //pkg/helloworld/server:go_default_test
+  //pkg/helloworld/server:server_test
 ```
 
 Tests can also be aggregated into test groups to be tested at once.
@@ -217,9 +217,9 @@ You can view the swagger at [https://localhost:4443/swagger.json](https://localh
 ### Client
 
 With the server running, you can test command line tools from `cmd`. 
-```text
+```bash
 $ bazel run //cmd/helloworld-client -- \
-    --name "Test Name" \
+    --name "Beutiful" \
     --server-addr localhost:4443 \
     --ca-cert $(pwd)/ssl/cert.pem
 
@@ -230,34 +230,41 @@ Target //cmd/helloworld-client:helloworld-client up-to-date:
 INFO: Elapsed time: 0.365s, Critical Path: 0.00s
 INFO: 1 process: 1 internal.
 INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client --name 'Test Name' --server-addr localhost:4443 --cert ...
+INFO: Running command line: bazel-bin/cmd/helloworld-client/helloworld-client_/helloworld-client --name 'Beutiful' --server-addr localhost:4443 --cert ...
 INFO: Build completed successfully, 1 total action
 
-2022/10/22 18:03:59 message:"Hello Test Name!"
+2022/10/22 18:03:59 message:"Hello Beutiful!"
 ```
 
 ### Running with Docker locally
 
-Each service should contain a `tarball` rule, which builds the binary in a tarball:
 ```
-oci_tarball(
-    name = "tarball",    
-    image = ":image",
-    repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest"],
+oci_load(
+    name = "load",
+    # Use the image built for the target platform
+    image = ":transitioned_image",
+    repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client:latest"],
 )
 ```
+
 For example, to build the tarball in amd64:
 ```bash
 bazel run \
   --platforms=@rules_go//go/toolchain:linux_amd64 \
   --cpu=k8 \
-  //services/helloworld:tarball
+  //services/helloworld:load
 # Load the tarball into docker
 docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest --http-port 4443 --cert /ssl/cert.pem --key /ssl/key.pem
 ```
+
 arm example:
 ```bash
- bazel run --platforms=@rules_go//go/toolchain:linux_arm64 //services/helloworld:tarball
+ bazel run --platforms=@rules_go//go/toolchain:linux_arm64 //services/helloworld:load
+```
+
+exclude for current platform:
+```bash
+bazel run //services/helloworld:load
 ```
 
 # Deployment
@@ -272,14 +279,15 @@ make fmt
 
 Used to deploy a service to the container registry.
 
-Each service should contain a `oci_push` rule, which defines the container registry and path.
+Each service should contain a `oci_push` rule, which defines the container registry and stamped image.
 
 ```
 oci_push(
     name = "push",
-    image = ":image",
-    remote_tags = ["$(version)"],
-    repository = "ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld",
+    image = ":transitioned_image",
+    remote_tags = ":stamped",
+    repository = "ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client",
+    visibility = ["//visibility:public"],
 )
 ```
 
