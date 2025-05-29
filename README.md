@@ -164,10 +164,9 @@ make test
 Test individual package:
 
 ```bash
-bazel test --features race \
+bazel test --@rules_go//go/config:race \
   --verbose_failures \
   --test_output=errors \
-  --action_env=CI=true \
   //pkg/helloworld/server:server_test
 ```
 
