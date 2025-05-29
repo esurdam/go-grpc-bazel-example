@@ -28,8 +28,8 @@ The example service, `helloworld`, showcases the recommended project structure, 
 Follow these steps to get the example service running locally:
 
 1. **Install Prerequisites**
-   - [Go](https://golang.org/doc/install) (>= 1.18)
-   - [Bazel](https://docs.bazel.build/versions/master/install.html) (tested with 5.4.0)
+   - [Go](https://golang.org/doc/install) (>= 1.23)
+   - [Bazel](https://docs.bazel.build/versions/master/install.html) (tested with 8.2.1)
    - [Docker](https://www.docker.com/) (optional, for container builds)
 
 2. **Clone the Repository**
@@ -40,8 +40,7 @@ Follow these steps to get the example service running locally:
 
 3. **Generate Protobuf and Build Files**
    ```bash
-   make gazelle   # Generates/updates BUILD.bazel files
-   make link      # Generates protobuf Go code for local development
+   make link      # Generates protobuf Go code for local development (optional)
    ```
 
 4. **Run Tests**
