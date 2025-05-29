@@ -15,21 +15,25 @@ import (
 )
 
 func main() {
-	var serverAddr = flag.String("server-addr", "localhost:443", "grpc server address")
-	var name = flag.String("name", "", "name to greet")
-	var sslCACert = flag.String("ca-cert", "", "path to tls ca cert")
-	var insecure = flag.Bool("insecure", false, "enable insecure tls skip verify")
+	serverAddr := flag.String("server-addr", "localhost:443", "grpc server address")
+	name := flag.String("name", "", "name to greet")
+	sslCACert := flag.String("ca-cert", "", "path to tls ca cert")
+	insecure := flag.Bool("insecure", false, "enable insecure tls skip verify")
 	flag.Parse()
 
-	// add the cert as CA
-	rootCAs, _ := x509.SystemCertPool()
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		log.Fatalf("failed to get system cert pool: %v", err)
+	}
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
 	}
 	if *sslCACert != "" {
-		certPEMBlock, _ := os.ReadFile(*sslCACert)
-		ok := rootCAs.AppendCertsFromPEM([]byte(certPEMBlock))
-		if !ok {
+		certPEMBlock, err := os.ReadFile(*sslCACert)
+		if err != nil {
+			log.Fatalf("failed to read CA cert file: %v", err)
+		}
+		if !rootCAs.AppendCertsFromPEM(certPEMBlock) {
 			log.Fatal("unable to append certs from PEM: bad certs")
 		}
 	}
@@ -39,12 +43,9 @@ func main() {
 		RootCAs:            rootCAs,
 		InsecureSkipVerify: *insecure,
 	})
-	dopts := []grpc.DialOption{
-		grpc.WithTransportCredentials(dcreds),
-	}
-	conn, err := grpc.Dial(*serverAddr, dopts...)
+	conn, err := grpc.NewClient(*serverAddr, grpc.WithTransportCredentials(dcreds))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to dial server: %v", err)
 	}
 	defer conn.Close()
 
@@ -52,11 +53,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	reply, err := cli.SayHello(ctx, &pb.HelloRequest{
-		Name: *name,
-	})
+	reply, err := cli.SayHello(ctx, &pb.HelloRequest{Name: *name})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to say hello: %v", err)
 	}
-	log.Println(reply)
+	log.Printf("Received reply: %v", reply)
 }
