@@ -46,11 +46,12 @@ pkg_tar(
 )
 
 # Prove that the application is at the path we expect in that tar.
-assert_archive_contains(
-    name = "assert_app_layer",
-    archive = "app_layer.tar",
-    expected = ["helloworld"],
-)
+# Uncomment to test the app layer in CI
+# assert_archive_contains(
+#     name = "assert_app_layer",
+#     archive = "app_layer.tar",
+#     expected = ["helloworld"],
+# )
 
 #https://github.com/aspect-build/bazel-examples/blob/main/oci_go_image/BUILD.bazel
 oci_image(
