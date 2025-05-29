@@ -328,6 +328,7 @@ See [ci/deploy.sh](ci/deploy.sh)
 
 **Bazelbuild rules**
 
+- [bazel central registry](https://registry.bazel.build)
 - [rules_oci](https://github.com/bazel-contrib/rules_oci/tree/main)
 - [rules_docker](https://github.com/bazelbuild/rules_docker)
 - [rules_go](https://github.com/bazelbuild/rules_go)
