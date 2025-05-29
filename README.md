@@ -84,8 +84,8 @@ WORKSPACE    # bazel workspace rules; external code
 
 ## Requirements
 
-- Go (>= 1.18)
-- Bazel (tested with 5.4.0)
+- Go (>= 1.23)
+- Bazel (tested with 8.2.1)
 
 ## Development Workflow
 
