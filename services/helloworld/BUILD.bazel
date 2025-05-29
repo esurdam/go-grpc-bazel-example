@@ -1,10 +1,10 @@
 load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
-load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@aspect_bazel_lib//lib:testing.bzl", "assert_archive_contains")
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 # This is used to embed the swagger.json file into the go binary
 genrule(
@@ -17,10 +17,10 @@ genrule(
 go_library(
     name = "helloworld_lib",
     srcs = [
-        "main.go",  
-        "data.go",     
+        "data.go",
+        "main.go",
     ],
-    embedsrcs = [ ":hellodata"],
+    embedsrcs = ["helloworld_openapi_swagger.json"],
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
@@ -39,7 +39,6 @@ go_binary(
     visibility = ["//visibility:public"],
 )
 
-
 # Put app go_binary into a tar layer.
 pkg_tar(
     name = "app_layer",
@@ -53,7 +52,7 @@ assert_archive_contains(
     expected = ["helloworld"],
 )
 
-#https://github.com/aspect-build/bazel-examples/blob/main/oci_go_image/BUILD.bazel  
+#https://github.com/aspect-build/bazel-examples/blob/main/oci_go_image/BUILD.bazel
 oci_image(
     name = "image",
     base = "@distroless_base",
@@ -72,6 +71,7 @@ platform_transition_filegroup(
         "@platforms//cpu:x86_64": "@rules_go//go/toolchain:linux_amd64",
     }),
 )
+
 # $ bazel run //oci_go_image:load
 # $ docker run --rm gcr.io/example:latest
 #   string(
