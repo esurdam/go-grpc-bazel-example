@@ -1,1 +1,1 @@
-# workspace(name = "com_gihub_adgreetz_go_grpc_bazel_example")
+# workspace(name = "com_gihub_esurdam_go_grpc_bazel_example")

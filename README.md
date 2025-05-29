@@ -223,7 +223,7 @@ oci_load(
     name = "load",
     # Use the image built for the target platform
     image = ":transitioned_image",
-    repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client:latest"],
+    repo_tags = ["ghcr.io/esurdam/go-grpc-bazel-example/cmd/helloworld-client:latest"],
 )
 ```
 
@@ -232,7 +232,7 @@ For example, to load tarball with current architecture:
 bazel run //services/helloworld:load
 
 # Run the loaded image
-docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest --http-port 4443 --cert /ssl/cert.pem --key /ssl/key.pem
+docker run --rm -v $(pwd)/ssl:/ssl -p 4443:4443 ghcr.io/esurdam/go-grpc-bazel-example/services/helloworld:latest --http-port 4443 --cert /ssl/cert.pem --key /ssl/key.pem
 ```
 
 arch example:
@@ -288,7 +288,7 @@ oci_push(
     name = "push",
     image = ":transitioned_image",
     remote_tags = ":stamped",
-    repository = "ghcr.io/adgreetz/go-grpc-bazel-example/cmd/helloworld-client",
+    repository = "ghcr.io/esurdam/go-grpc-bazel-example/cmd/helloworld-client",
     visibility = ["//visibility:public"],
 )
 ```
