@@ -15,23 +15,16 @@ jobs:
         with:
           go-version: 1.23.4
 
-      - name: Setup bazel
-        uses: jwlawson/actions-setup-bazel@v1
+      - uses: bazel-contrib/setup-bazel@0.15.0
         with:
-          bazel-version: '8.2.1'
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
 
-      - uses: actions/checkout@v3
-
-      - name: Mount bazel cache
-        uses: actions/cache@v3.0.11
-        env:
-          cache-name: bazel-cache
-        with:
-          path: |
-            ~/.cache/bazel
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}-main
+      - uses: actions/checkout@v4.2.2
 
       - name: Test
         run: make test
