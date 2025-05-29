@@ -30,24 +30,6 @@ gateway_grpc_library(
     visibility = ["//visibility:public"],
 )
 
-go_library(
-    name = "helloworld",
-    embed = [":helloworld_gateway_proto"],
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
-    visibility = ["//visibility:public"],
-    deps = [
-        "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
-        "@com_github_grpc_ecosystem_grpc_gateway_v2//utilities",
-        "@org_golang_google_genproto_googleapis_api//annotations",
-        "@org_golang_google_grpc//:go_default_library",
-        "@org_golang_google_grpc//codes",
-        "@org_golang_google_grpc//grpclog",
-        "@org_golang_google_grpc//metadata",
-        "@org_golang_google_grpc//status",
-        "@org_golang_google_protobuf//proto",
-    ],
-)
-
 gateway_openapiv2_compile(
     name = "helloworld_openapi_swagger",
     protos = [":helloworld_proto"],

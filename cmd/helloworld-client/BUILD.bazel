@@ -11,7 +11,7 @@ go_library(
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/cmd/helloworld-client",
     visibility = ["//visibility:private"],
     deps = [
-        "//pb/helloworld",
+        "//pb/helloworld:helloworld_go_proto",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//credentials",
     ],

@@ -6,7 +6,7 @@ go_library(
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/pkg/helloworld/server",
     visibility = ["//visibility:public"],
     deps = [
-        "//pb/helloworld",
+        "//pb/helloworld:helloworld_gateway_proto",
     ],
 )
 
@@ -15,6 +15,6 @@ go_test(
     srcs = ["server_test.go"],
     deps = [
         ":server",
-        "//pb/helloworld",
+        "//pb/helloworld:helloworld_gateway_proto",
     ],
 )

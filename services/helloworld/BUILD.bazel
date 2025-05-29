@@ -24,7 +24,7 @@ go_library(
     importpath = "github.com/AdGreetz/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:private"],
     deps = [
-        "//pb/helloworld",
+        "//pb/helloworld:helloworld_gateway_proto",
         "//pkg/helloworld/server",
         "@com_github_grpc_ecosystem_grpc_gateway_v2//runtime",
         "@com_github_philip_bui_grpc_zerolog//:grpc-zerolog",
@@ -84,7 +84,6 @@ oci_load(
     image = ":transitioned_image",
     repo_tags = ["ghcr.io/adgreetz/go-grpc-bazel-example/services/helloworld:latest"],
 )
-
 
 write_file(
     name = "tags_tmpl",
