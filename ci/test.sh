@@ -24,7 +24,7 @@ if [ "$buildcount" -gt 0 ]; then
 fi
 
 bazeltests=$(bazel query 'kind(".*_test rule", //...)')
-for i in "${bazeltests[@]}"; do
+for i in ${bazeltests[@]}; do
     echo "testing $i"
     bazel test --features race \
   --verbose_failures \

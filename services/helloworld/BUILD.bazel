@@ -48,7 +48,7 @@ pkg_tar(
 
 # Prove that the application is at the path we expect in that tar.
 assert_archive_contains(
-    name = "test_app_layer",
+    name = "assert_app_layer",
     archive = "app_layer.tar",
     expected = ["helloworld"],
 )
