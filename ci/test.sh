@@ -26,7 +26,7 @@ fi
 bazeltests=$(bazel query 'kind(".*_test rule", //...)')
 for i in ${bazeltests[@]}; do
     echo "testing $i"
-    bazel test --features race \
+    bazel test --@rules_go//go/config:race \
   --verbose_failures \
   --test_output=errors \
   --action_env=CI=true "${i}"
