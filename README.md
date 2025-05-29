@@ -1,6 +1,6 @@
 # go-grpc-bazel-example
 
-[![test](https://github.com/AdGreetz/go-grpc-bazel-example/actions/workflows/go.yml/badge.svg)](https://github.com/AdGreetz/go-grpc-bazel-example/actions/workflows/go.yml)
+[![test](https://github.com/esurdam/go-grpc-bazel-example/actions/workflows/go.yml/badge.svg)](https://github.com/esurdam/go-grpc-bazel-example/actions/workflows/go.yml)
 
 ## Project Overview
 
@@ -34,7 +34,7 @@ Follow these steps to get the example service running locally:
 
 2. **Clone the Repository**
    ```bash
-   git clone https://github.com/AdGreetz/go-grpc-bazel-example.git
+   git clone https://github.com/esurdam/go-grpc-bazel-example.git
    cd go-grpc-bazel-example
    ```
 
@@ -253,7 +253,7 @@ load("@rules_proto_grpc//grpc-gateway:defs.bzl", "gateway_grpc_compile", "gatewa
 
 gateway_grpc_library(
     name = "helloworld_gateway_lib_proto",
-    importpath = "github.com/AdGreetz/go-grpc-bazel-example/pb/helloworld",
+    importpath = "github.com/esurdam/go-grpc-bazel-example/pb/helloworld",
     protos = [":helloworld_proto"],
     visibility = ["//visibility:public"],
 )
