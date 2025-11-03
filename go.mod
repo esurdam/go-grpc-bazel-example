@@ -1,6 +1,6 @@
 module github.com/esurdam/go-grpc-bazel-example
 
-go 1.23.4
+go 1.25.3
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
