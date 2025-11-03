@@ -13,7 +13,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.23.4
+          go-version: 1.25.3
 
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
