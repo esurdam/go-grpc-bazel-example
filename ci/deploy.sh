@@ -27,7 +27,8 @@ process_service() {
     echo "yaml file not found: ci/${core}.yaml"
     return 0
   fi
-  local IMAGE_TAG=$(bazel run --platforms=$TOOLCHAIN --cpu=$CPU "$i")
+  # local IMAGE_TAG=$(bazel run --platforms=$TOOLCHAIN --cpu=$CPU "$i")
+  local IMAGE_TAG=$(bazel run --cpu=$CPU "$i")
   local VERSION=$(cat "$(bazel cquery --output=files "${i/:push/:stamped}")")
   # replace the image tag and version in the yaml file
   local template=$(cat "ci/${core}.yaml" | sed "s#{{IMAGE_TAG}}#$IMAGE_TAG#g" | sed "s/{{VERSION}}/$VERSION/g")

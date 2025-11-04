@@ -1,14 +1,14 @@
 module github.com/esurdam/go-grpc-bazel-example
 
-go 1.23.4
+go 1.25.3
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
 	github.com/philip-bui/grpc-zerolog v1.0.1
 	golang.org/x/tools v0.30.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb
-	google.golang.org/grpc v1.72.1
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/genproto/googleapis/api v0.0.0-20250528174236-200df99c418a
+	google.golang.org/grpc v1.74.2
+	google.golang.org/protobuf v1.36.10
 )
 
 require (
@@ -18,9 +18,9 @@ require (
 	github.com/rs/zerolog v1.32.0 // indirect
 	github.com/stretchr/testify v1.8.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 )
