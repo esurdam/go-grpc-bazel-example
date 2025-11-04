@@ -1,4 +1,4 @@
-.PHONY: build clean gazelle help link fmt test coverage upgrade _godeps push deploy
+.PHONY: build clean gazelle help link fmt test coverage upgrade _godeps push deploy tidy unlink _tidy
 .DEFAULT_GOAL = help
 VERSION ?= $(shell openssl rand -base64 8 |md5 |head -c8)
 
@@ -14,7 +14,7 @@ deploy: ## Deploy services to k8s
 fmt: ## Run build-fmt
 	bash ci/build-fmt.sh
 
-gazelle: ## Run link, go mod and gazelle
+gazelle: ## Run gazelle update
 	bazel run //:gazelle -- update
 
 link: ## Link bazel build proto to local
@@ -23,8 +23,16 @@ link: ## Link bazel build proto to local
 push: ## Push all 'push' to registry
 	bash ci/push-service.sh
 
+_tidy:
+	bazel run @rules_go//go -- mod tidy
+
+tidy: link _tidy unlink ## Run go mod tidy
+	
 test: ## Run test
 	bash ci/test.sh
+
+unlink: ## Unlink bazel compiled grpc files from local workspace
+	bash ci/unlink.sh
 
 _godeps:
 	go get -u ./...
