@@ -28,7 +28,7 @@ jobs:
           # Share repository cache between workflows.
           repository-cache: true
 
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
 
       - name: Test
         run: make test
