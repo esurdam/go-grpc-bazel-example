@@ -73,7 +73,9 @@ write_file(
 expand_template(
     name = "stamped",
     out = "_stamped.tags.txt",
-    stamp_substitutions = {"BUILD_VERSION": "{{BUILD_EMBED_LABEL}}"},
+    # Tag images by the git commit (STABLE_GIT_COMMIT from ci/status.sh) so tags
+    # are immutable and traceable, instead of a floating/random version.
+    stamp_substitutions = {"BUILD_VERSION": "{{STABLE_GIT_COMMIT}}"},
     substitutions = {"BUILD_VERSION": "0.0.0"},
     template = "tags_tmpl",
 )

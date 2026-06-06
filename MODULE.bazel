@@ -44,9 +44,10 @@ oci.pull(
         "linux/amd64",
         "linux/arm64/v8",
     ],
-    # 'latest' is not reproducible, but it's convenient.
-    # During the build we print a WARNING message that includes recommended 'digest' and 'platforms'
-    # values which you can use here in place of 'tag' to pin for reproducibility.
-    tag = "latest",
+    # Pinned by digest for reproducible, supply-chain-safe builds instead of the
+    # floating 'latest' tag. This is the multi-platform index digest of
+    # gcr.io/distroless/base:latest as of 2026-06 (linux/amd64 + linux/arm64/v8).
+    # Re-pin with: docker buildx imagetools inspect gcr.io/distroless/base:latest
+    digest = "sha256:f2df8702d4dcc45ce76df6cbc14ad1975fcf88a04bd0e8947b6194264f9ab75e",
 )
 use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64_v8")
