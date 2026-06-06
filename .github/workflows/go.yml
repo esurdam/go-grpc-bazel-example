@@ -10,10 +10,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      # Checkout MUST come first: setup-bazel derives its cache keys by hashing
+      # repo files (MODULE.bazel.lock, BUILD files, *.bzl). Without the sources
+      # present, the key is static and GitHub never saves an updated cache, so
+      # the Bazel disk cache freezes after the first run. Checkout also lets
+      # setup-go read the Go version straight from go.mod.
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25.3
+          # Track the Go version pinned in go.mod (kept in sync with
+          # MODULE.bazel's go_sdk.download) instead of hardcoding it here.
+          go-version-file: go.mod
 
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
@@ -21,14 +31,15 @@ jobs:
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@0.18.0
         with:
-          # Avoid downloading Bazel every time.
+          # The Bazel version itself is pinned by .bazelversion (9.1.0) and
+          # resolved by bazelisk; this only caches the downloaded Bazel binary.
           bazelisk-cache: true
-          # Store build cache per workflow.
+          # Cache the Bazel disk cache (compiled action outputs). Keyed by the
+          # workflow plus a hash of the build files, so it invalidates when
+          # dependencies or BUILD files change and is refreshed each run.
           disk-cache: ${{ github.workflow }}
-          # Share repository cache between workflows.
+          # Cache downloaded external repositories / module dependencies.
           repository-cache: true
-
-      - uses: actions/checkout@v6.0.2
 
       - name: Test
         run: make test
