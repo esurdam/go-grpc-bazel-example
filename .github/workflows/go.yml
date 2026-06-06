@@ -41,14 +41,17 @@ jobs:
           # Cache downloaded external repositories / module dependencies.
           repository-cache: true
 
-      - name: Test
-        run: make test
+      - name: Lint
+        run: make lint
+
+      # Runs every test with the Go race detector while collecting coverage,
+      # so this single pass is both the test gate and the coverage report
+      # (no separate race-test pass).
+      - name: Test & coverage
+        run: make coverage
 
       - name: Build
         run: make build
-
-      - name: Coverage
-        run: make coverage
 
       - name: Publish code cov
         uses: actions/upload-artifact@v6

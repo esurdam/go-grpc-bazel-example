@@ -1,33 +1,13 @@
 #!/bin/bash
-# This script is used to test the repo
+# Run the lint gate, then execute all Bazel tests with the Go race detector.
+#
+# Race is scoped to test targets (via query) rather than //...: the OCI image
+# targets transition to a cgo-disabled static platform, which is incompatible
+# with race instrumentation.
 
-env GO111MODULE=on
-BUILDIFIER_VERSION="5.4.0"
+set -eu
 
-which buildifier >/dev/null
-if [ $? -ne 0 ]; then
-  go install github.com/bazelbuild/buildtools/buildifier@$BUILDIFIER_VERSION
-fi
+bash ci/lint.sh
 
-set -eux
-
-gocount=$(git ls-files | grep '.go$' | grep -v 'bindata_assetfs.go$' | grep -v 'bindatafs.go$' | grep -v 'pb.go$' | grep -v 'bindata.go$' | grep -v 'pb.gw.go$' | xargs gofmt -e -l -s | wc -l)
-if [ "$gocount" -gt 0 ]; then
-  echo "Some Go files are not formatted. Check your formatting!"
-  exit 1
-fi
-
-buildcount=$(buildifier -mode=check $(find . -type f \( -iname BUILD -or -iname BUILD.bazel \) | grep -v node_modules | grep -v vendor) | wc -l)
-if [ "$buildcount" -gt 0 ]; then
-    echo "Some BUILD files are not formatted. Run make fmt"
-    exit 1
-fi
-
-bazeltests=$(bazel query 'kind(".*_test rule", //...)')
-for i in ${bazeltests[@]}; do
-    echo "testing $i"
-    bazel test --@rules_go//go/config:race \
-  --verbose_failures \
-  --test_output=errors \
-  --action_env=CI=true "${i}"
-done
+set -x
+bazel test --config=ci --config=race $(bazel query 'kind(".*_test rule", //...)')
