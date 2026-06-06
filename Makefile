@@ -26,8 +26,11 @@ push: ## Push all 'push' to registry
 _tidy:
 	bazel run @rules_go//go -- mod tidy
 
-tidy: link _tidy unlink ## Run go mod tidy
-	
+tidy: ## Run go mod tidy
+	$(MAKE) link
+	$(MAKE) _tidy
+	$(MAKE) unlink
+
 test: ## Run test
 	bash ci/test.sh
 
