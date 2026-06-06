@@ -3,7 +3,7 @@ load("@aspect_bazel_lib//lib:testing.bzl", "assert_archive_contains")
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_load", "oci_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 # Gateway service: link the gateway proto variant. helloworld_go_proto and
@@ -77,6 +77,30 @@ platform_transition_filegroup(
     }),
 )
 
+# Build the app image for each target platform and assemble them into a
+# multi-arch image index (manifest list). Pushing the index means one tag
+# resolves correctly on both linux/amd64 and linux/arm64 nodes, instead of the
+# single host-arch image that :transitioned_image produces.
+platform_transition_filegroup(
+    name = "image_linux_amd64",
+    srcs = [":image"],
+    target_platform = "@rules_go//go/toolchain:linux_amd64",
+)
+
+platform_transition_filegroup(
+    name = "image_linux_arm64",
+    srcs = [":image"],
+    target_platform = "@rules_go//go/toolchain:linux_arm64",
+)
+
+oci_image_index(
+    name = "image_index",
+    images = [
+        ":image_linux_amd64",
+        ":image_linux_arm64",
+    ],
+)
+
 # $ bazel run //oci_go_image:load
 # $ docker run --rm gcr.io/example:latest
 #   string(
@@ -110,7 +134,7 @@ expand_template(
 
 oci_push(
     name = "push",
-    image = ":transitioned_image",
+    image = ":image_index",
     remote_tags = ":stamped",
     repository = "ghcr.io/esurdam/go-grpc-bazel-example/services/helloworld",
     visibility = ["//visibility:public"],
