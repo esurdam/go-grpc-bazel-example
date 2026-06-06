@@ -19,7 +19,7 @@ jobs:
         uses: hrishikesh-kadam/setup-lcov@v1
 
       - name: Setup Bazel
-        uses: bazel-contrib/setup-bazel@0.15.0
+        uses: bazel-contrib/setup-bazel@0.18.0
         with:
           # Avoid downloading Bazel every time.
           bazelisk-cache: true
@@ -28,7 +28,7 @@ jobs:
           # Share repository cache between workflows.
           repository-cache: true
 
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v6.0.2
 
       - name: Test
         run: make test
@@ -40,7 +40,7 @@ jobs:
         run: make coverage
 
       - name: Publish code cov
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: code covarege report
           path: genhtml/
