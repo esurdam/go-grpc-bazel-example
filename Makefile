@@ -1,4 +1,4 @@
-.PHONY: build clean gazelle help link fmt test coverage upgrade _godeps push deploy tidy unlink _tidy
+.PHONY: build clean gazelle help link fmt lint test coverage upgrade _godeps push deploy tidy unlink _tidy
 .DEFAULT_GOAL = help
 VERSION ?= $(shell openssl rand -base64 8 |md5 |head -c8)
 
@@ -13,6 +13,9 @@ deploy: ## Deploy services to k8s
 
 fmt: ## Run build-fmt
 	bash ci/build-fmt.sh
+
+lint: ## Run format/lint checks (gofmt + buildifier)
+	bash ci/lint.sh
 
 gazelle: ## Run gazelle update
 	bazel run //:gazelle -- update

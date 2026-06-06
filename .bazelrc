@@ -2,3 +2,12 @@ build --stamp
 build --workspace_status_command=./ci/status.sh
 run --stamp
 run --workspace_status_command=./ci/status.sh
+
+# Enable the Go race detector with --config=race.
+build:race --@rules_go//go/config:race
+
+# Shared CI flags, applied to test/build/coverage via --config=ci so CI
+# behavior lives here instead of being inlined in the ci/*.sh scripts.
+build:ci --verbose_failures
+build:ci --action_env=CI=true
+test:ci --test_output=errors

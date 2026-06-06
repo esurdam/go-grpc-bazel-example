@@ -26,8 +26,13 @@ coverWithGo() {
 }
 
 
-coverWithBazel() {  
-  bazel coverage --combined_report=lcov //...
+coverWithBazel() {
+  # This pass doubles as the CI test gate: it runs every test with the Go race
+  # detector (--config=race) while collecting coverage, so there is no separate
+  # race-test pass. Race is scoped to test targets (via query) because the OCI
+  # image targets transition to a cgo-disabled platform that race rejects.
+  bazel coverage --config=ci --config=race --combined_report=lcov \
+    $(bazel query 'kind(".*_test rule", //...)')
   genhtml --branch-coverage --output genhtml "$(bazel info output_path)/_coverage/_coverage_report.dat"
 
   echo "Coverage completed."
