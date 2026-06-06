@@ -9,3 +9,6 @@ coverage.html
 coverage.txt
 ssl/
 genhtml/
+
+# Generated at deploy time by ci/deploy.sh (digest-pinned Kustomize overlay)
+deploy/*/overlays/
