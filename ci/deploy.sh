@@ -1,41 +1,56 @@
 #!/bin/bash
-# This script is used to deploy services to k8s
-# It will:
-# 1. Query all push rules
-# 2. For each push rule, it will:
-#    a. Check if the yaml file exists
-#    b. Run the push rule to get the image tag 
-#    c. Get the version from the stamped file
-#    d. Replace the image tag and version in the yaml file
-#    e. Apply the yaml file to k8s
+# Deploy the helloworld service to Kubernetes.
+#
+# Pushes the multi-arch image index, derives its immutable @sha256 digest from
+# the built artifact, generates a Kustomize overlay pinned to that digest, and
+# applies it. Deploying by digest (not a mutable tag) makes rollouts reproducible.
 
-env GO111MODULE=on
+set -euo pipefail
 
-set -e
-set -u
-set -x
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
 
-TOOLCHAIN="@rules_go//go/toolchain:linux_amd64" # TODO: Make this configurable
-CPU="k8"  # k8 is the default cpu for linux
+PUSH_TARGET="//services/helloworld:push"
+IMAGE_INDEX="//services/helloworld:image_index"
+IMAGE_REPO="ghcr.io/esurdam/go-grpc-bazel-example/services/helloworld"
+OVERLAY_DIR="deploy/helloworld/overlays/live"
 
-process_service() {
-  local i=$1
-  local root="${i/\/\//}" # remove the leading //
-  local core="${root/:push/}" # remove the trailing :push
-  # check if yaml exists
-  if [ ! -f "ci/${core}.yaml" ]; then
-    echo "yaml file not found: ci/${core}.yaml"
-    return 0
-  fi
-  # local IMAGE_TAG=$(bazel run --platforms=$TOOLCHAIN --cpu=$CPU "$i")
-  local IMAGE_TAG=$(bazel run --cpu=$CPU "$i")
-  local VERSION=$(cat "$(bazel cquery --output=files "${i/:push/:stamped}")")
-  # replace the image tag and version in the yaml file
-  local template=$(cat "ci/${core}.yaml" | sed "s#{{IMAGE_TAG}}#$IMAGE_TAG#g" | sed "s/{{VERSION}}/$VERSION/g")
-  echo "$template"
-}
+command -v kubectl >/dev/null || { echo "deploy: kubectl not found on PATH" >&2; exit 1; }
+command -v jq >/dev/null || { echo "deploy: jq not found on PATH" >&2; exit 1; }
 
-# Queries for all push rules and deploys them
-for i in $(bazel query 'kind(".push rule", //...)'); do
-  process_service "$i"
-done
+# 1. Build the multi-arch index and derive its digest from the OCI layout.
+#    This digest is content-addressed, so it is identical to what gets pushed.
+bazel build "$IMAGE_INDEX"
+INDEX_DIR="$(bazel cquery --output=files "$IMAGE_INDEX" 2>/dev/null | head -1)"
+DIGEST="$(jq -r '.manifests[0].digest' "$INDEX_DIR/index.json")"
+if [ -z "$DIGEST" ] || [ "$DIGEST" = "null" ]; then
+  echo "deploy: could not read image digest from $INDEX_DIR/index.json" >&2
+  exit 1
+fi
+
+# 2. Push the multi-arch index (SHA-tagged via :stamped).
+bazel run "$PUSH_TARGET"
+
+# 3. Generate the (gitignored) overlay pinned to the digest, with the git commit
+#    recorded as an annotation for traceability.
+GIT_SHA="$(git rev-parse --short HEAD)"
+mkdir -p "$OVERLAY_DIR"
+cat > "$OVERLAY_DIR/kustomization.yaml" <<EOF
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+images:
+  - name: ${IMAGE_REPO}
+    digest: ${DIGEST}
+
+commonAnnotations:
+  app.kubernetes.io/version: "${GIT_SHA}"
+EOF
+
+# 4. Render as a self-check (fails fast if the overlay is invalid), then apply.
+echo "deploy: rendering ${IMAGE_REPO}@${DIGEST} (commit ${GIT_SHA})"
+kubectl kustomize "$OVERLAY_DIR"
+kubectl apply -k "$OVERLAY_DIR"
