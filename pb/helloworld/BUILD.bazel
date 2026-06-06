@@ -2,6 +2,14 @@ load("@rules_go//proto:def.bzl", "go_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@rules_proto_grpc_grpc_gateway//:defs.bzl", "gateway_grpc_library", "gateway_openapiv2_compile")
 
+# These proto/go_proto rules are hand-maintained. helloworld_go_proto (lean, for
+# clients like cmd/helloworld-client) and helloworld_gateway_proto (for gateway
+# servers) deliberately share one importpath, and the googleapis deps are pinned
+# to external repos (@googleapis, @org_golang_google_genproto_googleapis_api) --
+# a layout Gazelle can't model. Gazelle is told to skip this whole package via
+# `# gazelle:exclude pb/helloworld` in the root BUILD, so `gazelle update` never
+# regenerates or repoints these rules. Edit them by hand.
+
 proto_library(
     name = "helloworld_proto",
     srcs = ["helloworld.proto"],
