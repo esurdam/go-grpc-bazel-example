@@ -5,13 +5,17 @@ load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
+# This client links the lean (non-gateway) proto variant. helloworld_go_proto and
+# helloworld_gateway_proto share one importpath, so resolve it explicitly here.
+# gazelle:resolve go github.com/esurdam/go-grpc-bazel-example/pb/helloworld //pb/helloworld:helloworld_go_proto
+
 go_library(
     name = "helloworld-client_lib",
     srcs = ["main.go"],
     importpath = "github.com/esurdam/go-grpc-bazel-example/cmd/helloworld-client",
     visibility = ["//visibility:private"],
     deps = [
-        "//pb/helloworld:helloworld_go_proto",
+        "//pb/helloworld:helloworld_go_proto",  # keep
         "@org_golang_google_grpc//:grpc",
         "@org_golang_google_grpc//credentials",
     ],
