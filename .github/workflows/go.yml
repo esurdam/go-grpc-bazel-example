@@ -16,7 +16,7 @@ jobs:
       # the Bazel disk cache freezes after the first run. Checkout also lets
       # setup-go read the Go version straight from go.mod.
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.0
 
       - name: Set up Go
         uses: actions/setup-go@v6
