@@ -23,6 +23,8 @@ import (
 	zerolog "github.com/philip-bui/grpc-zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 var (
@@ -43,82 +45,123 @@ func grpcHandlerFunc(grpcServer *grpc.Server, httpServer http.Handler) http.Hand
 	})
 }
 
-func main() {
-	flag.Parse()
-
-	// Source cert info in production
-	switch {
-	case *sslCert == "":
-		*sslCert = os.Getenv("SSL_CERT_PATH")
-	case *sslKey == "":
-		*sslKey = os.Getenv("SSL_KEY_PATH")
-	case *sslCACert == "":
-		*sslCACert = os.Getenv("SSL_CA_CERT_PATH")
+func applyEnvFallbacks(cert, key, ca *string) {
+	if *cert == "" {
+		*cert = os.Getenv("SSL_CERT_PATH")
+	}
+	if *key == "" {
+		*key = os.Getenv("SSL_KEY_PATH")
+	}
+	if *ca == "" {
+		*ca = os.Getenv("SSL_CA_CERT_PATH")
 	}
 	// In this example, the generated cert contains the CA.
-	// In a production environment, the CA Cert should be seperate
-	if *sslCACert == "" {
-		*sslCACert = *sslCert
+	// In a production environment, the CA cert should be separate.
+	if *ca == "" {
+		*ca = *cert
 	}
+}
+
+func loadRootCAs(caPath string) (*x509.CertPool, error) {
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, fmt.Errorf("system cert pool: %w", err)
+	}
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	if caPath == "" {
+		return rootCAs, nil
+	}
+	certPEMBlock, err := os.ReadFile(caPath)
+	if err != nil {
+		return nil, fmt.Errorf("read ca cert %q: %w", caPath, err)
+	}
+	if !rootCAs.AppendCertsFromPEM(certPEMBlock) {
+		return nil, fmt.Errorf("append ca certs from PEM: bad certs")
+	}
+	return rootCAs, nil
+}
+
+func tlsServerName(hostPort string) string {
+	host, _, err := net.SplitHostPort(hostPort)
+	if err != nil {
+		return hostPort
+	}
+	return host
+}
+
+// newMux builds the HTTP/gRPC multiplexed handler. TLS is terminated by
+// http.Server; do not attach grpc.Creds when using ServeHTTP.
+func newMux(ctx context.Context, dialAddr string, rootCAs *x509.CertPool, skipVerify bool, swagger []byte) (http.Handler, *grpc.Server, error) {
+	grpcServer := grpc.NewServer(zerolog.UnaryInterceptor())
+	pb.RegisterGreeterServer(grpcServer, &server.Server{})
+
+	healthServer := health.NewServer()
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus(pb.Greeter_ServiceDesc.ServiceName, healthpb.HealthCheckResponse_SERVING)
+
+	dcreds := credentials.NewTLS(&tls.Config{
+		ServerName:         tlsServerName(dialAddr),
+		RootCAs:            rootCAs,
+		InsecureSkipVerify: skipVerify,
+		MinVersion:         tls.VersionTLS12,
+	})
+	gwmux := runtime.NewServeMux()
+	if err := pb.RegisterGreeterHandlerFromEndpoint(ctx, gwmux, dialAddr, []grpc.DialOption{
+		grpc.WithTransportCredentials(dcreds),
+	}); err != nil {
+		return nil, nil, fmt.Errorf("register gateway: %w", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	})
+	openapi.Mount(mux, swagger, "Helloworld API")
+	mux.Handle("/", gwmux)
+
+	return grpcHandlerFunc(grpcServer, mux), grpcServer, nil
+}
+
+func main() {
+	flag.Parse()
+	applyEnvFallbacks(sslCert, sslKey, sslCACert)
 
 	pair, err := tls.LoadX509KeyPair(*sslCert, *sslKey)
 	if err != nil {
 		log.Fatalf("unable to load ssl cert or key -- required: %v\n", err)
 	}
 
-	rootCAs, _ := x509.SystemCertPool()
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
+	rootCAs, err := loadRootCAs(*sslCACert)
+	if err != nil {
+		log.Fatalf("unable to load ca certs: %v\n", err)
 	}
-	if *sslCACert != "" {
-		certPEMBlock, _ := os.ReadFile(*sslCACert)
-		ok := rootCAs.AppendCertsFromPEM([]byte(certPEMBlock))
-		if !ok {
-			log.Fatal("unable to append certs from PEM: bad certs")
-		}
-	}
+
 	addr := fmt.Sprintf("localhost:%d", *httpPort)
-
-	opts := []grpc.ServerOption{
-		zerolog.UnaryInterceptor(),
-		grpc.Creds(credentials.NewClientTLSFromCert(rootCAs, addr)),
-	}
-	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterGreeterServer(grpcServer, &server.Server{})
-
-	// Register Greeter
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName:         addr,
-		RootCAs:            rootCAs,
-		InsecureSkipVerify: *insecure,
-	})
-	dopts := []grpc.DialOption{
-		grpc.WithTransportCredentials(dcreds),
-	}
-	gwmux := runtime.NewServeMux()
-	if err := pb.RegisterGreeterHandlerFromEndpoint(ctx, gwmux, addr, dopts); err != nil {
-		log.Fatalln("failed to register gateway:", err)
+	handler, _, err := newMux(ctx, addr, rootCAs, *insecure, Data)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	// Handle OpenAPI spec + interactive docs UI
-	mux := http.NewServeMux()
-	openapi.Mount(mux, Data, "Helloworld API")
-	mux.Handle("/", gwmux)
-
-	// Handle server
 	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", *httpPort))
 	if err != nil {
 		log.Fatalf("unable to listen on tcp port %d, %v\n", *httpPort, err)
 	}
 	gwServer := &http.Server{
-		Addr:    addr,
-		Handler: grpcHandlerFunc(grpcServer, mux),
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: 10 * time.Second,
 		TLSConfig: &tls.Config{
 			Certificates: []tls.Certificate{pair},
-			NextProtos:   []string{"h2"},
+			// Advertise both so kubelet HTTPS probes (HTTP/1.1) and gRPC (h2) work.
+			NextProtos: []string{"h2", "http/1.1"},
+			MinVersion: tls.VersionTLS12,
 		},
 	}
 	go func() {
@@ -128,20 +171,14 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with
-	// a timeout of 5 seconds.
 	quit := make(chan os.Signal, 1)
-	// kill (no param) default send syscall.SIGTERM
-	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("shutting down server...")
 
-	// The context is used to inform the server it has 5 seconds to finish
-	// the request it is currently handling
 	ctxClos, cancelClose := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelClose()
+	cancel() // stop gateway dial context
 	if err := gwServer.Shutdown(ctxClos); err != nil {
 		log.Fatal("server forced to shutdown:", err)
 	}
