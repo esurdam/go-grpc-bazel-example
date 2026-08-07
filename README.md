@@ -1,6 +1,10 @@
 # go-grpc-bazel-example
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/esurdam/go-grpc-bazel-example.svg)](https://pkg.go.dev/github.com/esurdam/go-grpc-bazel-example)
+[![Go Report Card](https://goreportcard.com/badge/github.com/esurdam/go-grpc-bazel-example)](https://goreportcard.com/report/github.com/esurdam/go-grpc-bazel-example)
+[![codecov](https://codecov.io/gh/esurdam/go-grpc-bazel-example/branch/main/graph/badge.svg)](https://codecov.io/gh/esurdam/go-grpc-bazel-example)
 [![test](https://github.com/esurdam/go-grpc-bazel-example/actions/workflows/go.yml/badge.svg)](https://github.com/esurdam/go-grpc-bazel-example/actions/workflows/go.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/esurdam/go-grpc-bazel-example/blob/main/LICENSE)
 
 ## Project Overview
 
@@ -328,6 +332,12 @@ make deploy
 See [ci/deploy.sh](ci/deploy.sh) and [deploy/helloworld/base](deploy/helloworld/base)
 
 ## Useful Links
+
+**Quality reports**
+
+- [pkg.go.dev](https://pkg.go.dev/github.com/esurdam/go-grpc-bazel-example)
+- [Go Report Card](https://goreportcard.com/report/github.com/esurdam/go-grpc-bazel-example)
+- [Codecov](https://app.codecov.io/gh/esurdam/go-grpc-bazel-example)
 
 **GRPC**
 

@@ -50,11 +50,20 @@ jobs:
       - name: Test & coverage
         run: make coverage
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.lcov
+          flags: unittests
+          name: bazel-coverage
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Build
         run: make build
 
-      - name: Publish code cov
+      - name: Publish coverage HTML
         uses: actions/upload-artifact@v7
         with:
-          name: code covarege report
+          name: coverage-report
           path: genhtml/
