@@ -13,8 +13,9 @@ bazel_dep(name = "rules_proto_grpc_grpc_gateway", version = "5.8.0")
 # Pin the grpc-gateway Bazel module to match the Go module version in go.mod,
 # keeping the protoc-gen-grpc-gateway codegen in lockstep with the runtime library.
 # (rules_proto_grpc_grpc_gateway 5.8.0 otherwise pulls in 2.26.3 transitively.)
-# BCR latest for this module is 2.29.0.bcr.3 (2.30.0 not published yet).
-bazel_dep(name = "grpc_ecosystem_grpc_gateway", version = "2.29.0.bcr.3")
+# Do not use 2.29.0.bcr.3: it depends on rules_android 0.6.6, which breaks analysis
+# on GitHub-hosted runners (CcInfo removed). Stay on plain 2.29.0.
+bazel_dep(name = "grpc_ecosystem_grpc_gateway", version = "2.29.0")
 bazel_dep(name = "rules_oci", version = "2.3.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
