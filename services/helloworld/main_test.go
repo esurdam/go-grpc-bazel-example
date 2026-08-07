@@ -232,7 +232,7 @@ func TestMuxTLSGRPCAndREST(t *testing.T) {
 				MinVersion: tls.VersionTLS12,
 				NextProtos: []string{"http/1.1"},
 			},
-			TLSNextProto: map[string]func(string, *tls.Conn) http.RoundTripper{},
+			TLSNextProto:      map[string]func(string, *tls.Conn) http.RoundTripper{},
 			ForceAttemptHTTP2: false,
 		}}
 		resp, err := client.Get("https://" + addr + "/healthz")
