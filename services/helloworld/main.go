@@ -178,7 +178,9 @@ func main() {
 
 	ctxClos, cancelClose := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelClose()
-	cancel() // stop gateway dial context
+	// Drain active HTTP/gRPC handlers first. Canceling the gateway dial
+	// context earlier would close the backend conn mid-flight; defer cancel()
+	// runs after Shutdown returns.
 	if err := gwServer.Shutdown(ctxClos); err != nil {
 		log.Fatal("server forced to shutdown:", err)
 	}
