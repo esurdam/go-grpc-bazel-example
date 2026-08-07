@@ -35,6 +35,15 @@ var (
 	insecure  = flag.Bool("insecure", false, "enable insecure tls skip verify for grpc-gateway")
 )
 
+type serverConfig struct {
+	httpPort int
+	cert     string
+	key      string
+	ca       string
+	insecure bool
+	swagger  []byte
+}
+
 func grpcHandlerFunc(grpcServer *grpc.Server, httpServer http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
@@ -126,33 +135,35 @@ func newMux(ctx context.Context, dialAddr string, rootCAs *x509.CertPool, skipVe
 	return grpcHandlerFunc(grpcServer, mux), grpcServer, nil
 }
 
-func main() {
-	flag.Parse()
-	applyEnvFallbacks(sslCert, sslKey, sslCACert)
-
-	pair, err := tls.LoadX509KeyPair(*sslCert, *sslKey)
+// run starts the TLS multiplexed server and blocks until ctx is canceled,
+// then drains in-flight requests via http.Server.Shutdown.
+func run(ctx context.Context, cfg serverConfig) error {
+	pair, err := tls.LoadX509KeyPair(cfg.cert, cfg.key)
 	if err != nil {
-		log.Fatalf("unable to load ssl cert or key -- required: %v\n", err)
+		return fmt.Errorf("unable to load ssl cert or key -- required: %w", err)
 	}
 
-	rootCAs, err := loadRootCAs(*sslCACert)
+	rootCAs, err := loadRootCAs(cfg.ca)
 	if err != nil {
-		log.Fatalf("unable to load ca certs: %v\n", err)
+		return fmt.Errorf("unable to load ca certs: %w", err)
 	}
 
-	addr := fmt.Sprintf("localhost:%d", *httpPort)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// Gateway dial lifecycle is independent of the shutdown signal so
+	// http.Server.Shutdown can drain in-flight REST requests first.
+	muxCtx, muxCancel := context.WithCancel(context.Background())
+	defer muxCancel()
 
-	handler, _, err := newMux(ctx, addr, rootCAs, *insecure, Data)
+	addr := fmt.Sprintf("localhost:%d", cfg.httpPort)
+	handler, _, err := newMux(muxCtx, addr, rootCAs, cfg.insecure, cfg.swagger)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
-	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", *httpPort))
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.httpPort))
 	if err != nil {
-		log.Fatalf("unable to listen on tcp port %d, %v\n", *httpPort, err)
+		return fmt.Errorf("unable to listen on tcp port %d: %w", cfg.httpPort, err)
 	}
+
 	gwServer := &http.Server{
 		Addr:              addr,
 		Handler:           handler,
@@ -164,26 +175,56 @@ func main() {
 			MinVersion: tls.VersionTLS12,
 		},
 	}
+
+	errCh := make(chan error, 1)
 	go func() {
 		log.Printf("serving at https://%s\n", addr)
-		if err := gwServer.Serve(tls.NewListener(conn, gwServer.TLSConfig)); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+		if err := gwServer.Serve(tls.NewListener(ln, gwServer.TLSConfig)); err != nil && err != http.ErrServerClosed {
+			errCh <- err
+			return
 		}
+		errCh <- nil
 	}()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("shutting down server...")
-
-	ctxClos, cancelClose := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelClose()
-	// Drain active HTTP/gRPC handlers first. Canceling the gateway dial
-	// context earlier would close the backend conn mid-flight; defer cancel()
-	// runs after Shutdown returns.
-	if err := gwServer.Shutdown(ctxClos); err != nil {
-		log.Fatal("server forced to shutdown:", err)
+	select {
+	case <-ctx.Done():
+	case err := <-errCh:
+		if err != nil {
+			_ = ln.Close()
+			return err
+		}
 	}
 
+	shutdownCtx, cancelClose := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelClose()
+	if err := gwServer.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("server forced to shutdown: %w", err)
+	}
+	return <-errCh
+}
+
+var notifyContext = signal.NotifyContext
+
+func main() {
+	if err := mainErr(Data); err != nil {
+		log.Fatal(err)
+	}
 	log.Println("server exiting")
+}
+
+func mainErr(swagger []byte) error {
+	flag.Parse()
+	applyEnvFallbacks(sslCert, sslKey, sslCACert)
+
+	ctx, stop := notifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	return run(ctx, serverConfig{
+		httpPort: *httpPort,
+		cert:     *sslCert,
+		key:      *sslKey,
+		ca:       *sslCACert,
+		insecure: *insecure,
+		swagger:  swagger,
+	})
 }
