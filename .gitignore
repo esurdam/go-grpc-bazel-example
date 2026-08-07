@@ -7,6 +7,8 @@ bazel-*
 
 coverage.html
 coverage.txt
+coverage.lcov
+coverage.out
 ssl/
 genhtml/
 

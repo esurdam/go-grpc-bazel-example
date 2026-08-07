@@ -33,7 +33,12 @@ coverWithBazel() {
   # image targets transition to a cgo-disabled platform that race rejects.
   bazel coverage --config=ci --config=race --combined_report=lcov \
     $(bazel query 'kind(".*_test rule", //...)')
-  genhtml --branch-coverage --output genhtml "$(bazel info output_path)/_coverage/_coverage_report.dat"
+
+  local report
+  report="$(bazel info output_path)/_coverage/_coverage_report.dat"
+  # Stable path for Codecov / other coverage services.
+  cp "${report}" coverage.lcov
+  genhtml --branch-coverage --output genhtml "${report}"
 
   echo "Coverage completed."
   echo "Open genhtml/index.html to view result."
