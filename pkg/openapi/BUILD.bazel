@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "openapi",
+    srcs = ["docs.go"],
+    importpath = "github.com/esurdam/go-grpc-bazel-example/pkg/openapi",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "openapi_test",
+    srcs = ["docs_test.go"],
+    deps = [":openapi"],
+)
