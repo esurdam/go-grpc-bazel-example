@@ -203,28 +203,22 @@ func run(ctx context.Context, cfg serverConfig) error {
 	return <-errCh
 }
 
-var notifyContext = signal.NotifyContext
-
 func main() {
-	if err := mainErr(Data); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("server exiting")
-}
-
-func mainErr(swagger []byte) error {
 	flag.Parse()
 	applyEnvFallbacks(sslCert, sslKey, sslCACert)
 
-	ctx, stop := notifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	return run(ctx, serverConfig{
+	if err := run(ctx, serverConfig{
 		httpPort: *httpPort,
 		cert:     *sslCert,
 		key:      *sslKey,
 		ca:       *sslCACert,
 		insecure: *insecure,
-		swagger:  swagger,
-	})
+		swagger:  Data,
+	}); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("server exiting")
 }
