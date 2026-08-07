@@ -14,10 +14,6 @@ spec:
     metadata:
       labels:
         app: helloworld
-      annotations:
-        # prometheus annotations by default
-        prometheus.io/port: '10824'
-        prometheus.io/scrape: 'true'
     spec:
       imagePullSecrets:
         - name: dockerconfigjson-github-com
@@ -27,7 +23,8 @@ spec:
           # digest via the generated Kustomize overlay (deploy/helloworld/overlays/live).
           image: ghcr.io/esurdam/go-grpc-bazel-example/services/helloworld:latest
           ports:
-            - containerPort: 443
+            - name: mux
+              containerPort: 443
           # Safe to skip re-pulling: we deploy by immutable digest, so the
           # reference can never point at different content.
           imagePullPolicy: IfNotPresent
@@ -38,17 +35,39 @@ spec:
             limits:
               memory: "64Mi"
               cpu: "100m"
-          # should contain a healthcheck path & port; excluded for brevity in this repo
           livenessProbe:
             httpGet:
-              path: /swagger.json
-              port: 443
+              path: /healthz
+              port: mux
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /swagger.json
-              port: 443
+              path: /healthz
+              port: mux
+              scheme: HTTPS
+            initialDelaySeconds: 2
+            periodSeconds: 5
           env:
             - name: ENV
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: SSL_CERT_PATH
+              value: /etc/tls/tls.crt
+            - name: SSL_KEY_PATH
+              value: /etc/tls/tls.key
+            - name: SSL_CA_CERT_PATH
+              value: /etc/tls/tls.crt
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/tls
+              readOnly: true
+      volumes:
+        # Create before deploy, e.g.:
+        #   kubectl create secret tls helloworld-tls \
+        #     --cert=ssl/cert.pem --key=ssl/key.pem
+        - name: tls
+          secret:
+            secretName: helloworld-tls

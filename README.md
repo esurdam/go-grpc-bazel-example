@@ -334,7 +334,11 @@ See [ci/push-service.sh](ci/push-service.sh)
 Since [rules_docker](https://github.com/bazelbuild/rules_docker) has been deprecated, there is no `k8s_deploy` rule. Instead `make deploy` pushes the image, derives its immutable `@sha256` digest, renders a [Kustomize](https://kustomize.io/) overlay pinned to that digest, and applies it with `kubectl apply -k`. Deploying by digest (rather than a moving tag) keeps rollouts reproducible.
 
 Manifests live in `deploy/<service>/base`; the digest-pinned overlay is generated at deploy time. Requires `kubectl` and `jq`.
+
+Create a TLS secret before the first deploy (the Deployment mounts `helloworld-tls` at `/etc/tls` and probes `HTTPS /healthz`):
+
 ```bash
+kubectl create secret tls helloworld-tls --cert=ssl/cert.pem --key=ssl/key.pem
 make deploy
 ```
 

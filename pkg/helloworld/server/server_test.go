@@ -7,6 +7,8 @@ import (
 
 	pb "github.com/esurdam/go-grpc-bazel-example/pb/helloworld"
 	"github.com/esurdam/go-grpc-bazel-example/pkg/helloworld/server"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestServer_SayHello(t *testing.T) {
@@ -15,47 +17,36 @@ func TestServer_SayHello(t *testing.T) {
 		req *pb.HelloRequest
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    *pb.HelloReply
-		wantErr bool
+		name     string
+		args     args
+		want     *pb.HelloReply
+		wantErr  bool
+		wantCode codes.Code
 	}{
 		{
-			name: "TestServer_SayHello",
+			name: "greets by name",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.HelloRequest{
-					Name: "TestName",
-				},
+				req: &pb.HelloRequest{Name: "TestName"},
 			},
-			want: &pb.HelloReply{
-				Message: "Hello TestName!",
-			},
-			wantErr: false,
+			want: &pb.HelloReply{Message: "Hello TestName!"},
 		},
 		{
-			name: "TestServer_SayHello2",
+			name: "greets user",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.HelloRequest{
-					Name: "user",
-				},
+				req: &pb.HelloRequest{Name: "user"},
 			},
-			want: &pb.HelloReply{
-				Message: "Hello user!",
-			},
-			wantErr: false,
+			want: &pb.HelloReply{Message: "Hello user!"},
 		},
 		{
-			name: "TestServer_SayHelloErr",
+			name: "empty name is invalid argument",
 			args: args{
 				ctx: context.Background(),
-				req: &pb.HelloRequest{
-					Name: "",
-				},
+				req: &pb.HelloRequest{Name: ""},
 			},
-			want:    nil,
-			wantErr: true,
+			wantErr:  true,
+			wantCode: codes.InvalidArgument,
 		},
 	}
 	for _, tt := range tests {
@@ -63,7 +54,12 @@ func TestServer_SayHello(t *testing.T) {
 			s := &server.Server{}
 			got, err := s.SayHello(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("SayHello() error = %v, wantErr %v", err, tt.wantErr)
+				t.Fatalf("SayHello() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.wantErr {
+				if status.Code(err) != tt.wantCode {
+					t.Fatalf("SayHello() status = %v, want %v", status.Code(err), tt.wantCode)
+				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {

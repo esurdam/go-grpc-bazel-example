@@ -10,7 +10,8 @@ Monorepo — all microservices, protobufs, and shared code live in a single repo
 - `pkg/` — Go implementations of proto services.
 - `services/` — Entrypoints for deployable microservices.
 - `cmd/` — Standalone command-line tools.
-- `ci/` — CI/CD scripts and Kubernetes manifests.
+- `ci/` — CI/CD scripts.
+- `deploy/` — Kubernetes manifests (Kustomize bases/overlays).
 - `tools/` — Tool versioning and helper scripts.
 - `ssl/` — Local self-signed certificates (never commit private keys).
 
@@ -18,7 +19,7 @@ Monorepo — all microservices, protobufs, and shared code live in a single repo
 
 - **Build all services**: `make build` or `bazel build :build_all`
 - **Run all tests**: `make test` or `bazel test //...`
-- **Run single test**: `bazel test --features race --verbose_failures --test_output=errors //pkg/path:target_test`
+- **Run single test**: `bazel test --config=race --verbose_failures --test_output=errors //pkg/path:target_test`
 - **Format code**: `make fmt`
 - **Generate protos**: `make link`
 - **Update BUILD files**: `make gazelle`
@@ -44,7 +45,7 @@ Each new service must have:
 - Proto definition in `pb/<service>/<service>.proto`
 - Implementation in `pkg/<service>/server/server.go`
 - Entrypoint in `services/<service>/main.go`
-- Kubernetes manifest in `ci/services/<service>.yaml`
+- Kubernetes manifests in `deploy/<service>/base/`
 - Aggregation in the root `BUILD` file
 
 See the scaffold pattern in `README.md` for full details.
@@ -54,14 +55,14 @@ See the scaffold pattern in `README.md` for full details.
 - All code must have tests. Use table-driven tests with descriptive names.
 - Write comprehensive unit tests for all implementations.
 - Run `make test` before submitting changes.
-- Run an individual package test with `bazel test --features race --verbose_failures --test_output=errors //pkg/path:target_test`.
+- Run an individual package test with `bazel test --config=race --verbose_failures --test_output=errors //pkg/path:target_test`.
 
 ## Code Style
 
 - Follow Go standard formatting with `gofmt -s`.
 - Organize imports with `goimports`.
 - Format Bazel files with `buildifier`.
-- Error handling: return simple error objects (`errors.New()`) for validation.
+- Error handling: return typed gRPC errors (`status.Error(codes.InvalidArgument, ...)`) for validation.
 - Package naming: use domain-oriented packages under `pkg/`.
 - Proto implementation: shared services in `pkg/`, service-specific in `services/{name}/pkg/`.
 

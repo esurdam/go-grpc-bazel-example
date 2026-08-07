@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"flag"
 	"log"
+	"net"
 	"os"
 	"time"
 
@@ -38,10 +39,15 @@ func main() {
 		}
 	}
 
+	serverName := *serverAddr
+	if host, _, err := net.SplitHostPort(*serverAddr); err == nil {
+		serverName = host
+	}
 	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName:         *serverAddr,
+		ServerName:         serverName,
 		RootCAs:            rootCAs,
 		InsecureSkipVerify: *insecure,
+		MinVersion:         tls.VersionTLS12,
 	})
 	conn, err := grpc.NewClient(*serverAddr, grpc.WithTransportCredentials(dcreds))
 	if err != nil {
