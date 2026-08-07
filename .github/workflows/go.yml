@@ -16,10 +16,10 @@ jobs:
       # the Bazel disk cache freezes after the first run. Checkout also lets
       # setup-go read the Go version straight from go.mod.
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           # Track the Go version pinned in go.mod (kept in sync with
           # MODULE.bazel's go_sdk.download) instead of hardcoding it here.
@@ -29,7 +29,7 @@ jobs:
         uses: hrishikesh-kadam/setup-lcov@v1
 
       - name: Setup Bazel
-        uses: bazel-contrib/setup-bazel@0.18.0
+        uses: bazel-contrib/setup-bazel@0.19.0
         with:
           # The Bazel version itself is pinned by .bazelversion (9.1.0) and
           # resolved by bazelisk; this only caches the downloaded Bazel binary.
