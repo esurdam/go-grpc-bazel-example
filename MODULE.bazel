@@ -3,7 +3,9 @@ module(
     version = "0.1.0",
 )
 
-bazel_dep(name = "rules_go", version = "0.62.0")
+# Stay on 0.61.1: rules_go 0.62.0 pulls rules_android toolchains that fail analysis
+# on GitHub-hosted Linux runners (CcInfo symbol removed / androidsdk parse error).
+bazel_dep(name = "rules_go", version = "0.61.1")
 bazel_dep(name = "rules_pkg", version = "1.2.0")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_proto_grpc_grpc_gateway", version = "5.8.0")
@@ -40,15 +42,15 @@ use_repo(
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "distroless_base",
-    image = "gcr.io/distroless/base",
-    platforms = [
-        "linux/amd64",
-        "linux/arm64/v8",
-    ],
     # Pinned by digest for reproducible, supply-chain-safe builds instead of the
     # floating 'latest' tag. This is the multi-platform index digest of
     # gcr.io/distroless/base:latest as of 2026-06 (linux/amd64 + linux/arm64/v8).
     # Re-pin with: docker buildx imagetools inspect gcr.io/distroless/base:latest
     digest = "sha256:f2df8702d4dcc45ce76df6cbc14ad1975fcf88a04bd0e8947b6194264f9ab75e",
+    image = "gcr.io/distroless/base",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
 )
 use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64_v8")
