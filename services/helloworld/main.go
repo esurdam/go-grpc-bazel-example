@@ -18,6 +18,7 @@ import (
 
 	pb "github.com/esurdam/go-grpc-bazel-example/pb/helloworld"
 	"github.com/esurdam/go-grpc-bazel-example/pkg/helloworld/server"
+	"github.com/esurdam/go-grpc-bazel-example/pkg/openapi"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	zerolog "github.com/philip-bui/grpc-zerolog"
 	"google.golang.org/grpc"
@@ -102,11 +103,9 @@ func main() {
 		log.Fatalln("failed to register gateway:", err)
 	}
 
-	// Handle swagger
+	// Handle OpenAPI spec + interactive docs UI
 	mux := http.NewServeMux()
-	mux.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write(Data)
-	})
+	openapi.Mount(mux, Data, "Helloworld API")
 	mux.Handle("/", gwmux)
 
 	// Handle server

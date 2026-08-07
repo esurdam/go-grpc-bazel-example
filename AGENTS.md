@@ -79,4 +79,6 @@ See the scaffold pattern in `README.md` for full details.
 ## Swagger / OpenAPI
 
 - Expose Swagger JSON at `/swagger.json` for each service.
+- Expose interactive Scalar docs at `/docs/` via `pkg/openapi.Mount` (CDN-backed; air-gapped envs should embed assets).
+- Prefer `openapi_naming_strategy=simple` and explicit `openapiv2_schema` / field options so model names stay readable.
 - Use the `gateway_grpc_library` and `gateway_openapiv2_compile` Bazel rules for OpenAPI generation.

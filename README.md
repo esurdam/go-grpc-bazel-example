@@ -68,7 +68,8 @@ Follow these steps to get the example service running locally:
      ```
 
 6. **View Swagger/OpenAPI Docs**
-   - Open [https://localhost:4443/swagger.json](https://localhost:4443/swagger.json) in your browser.
+   - Interactive UI: [https://localhost:4443/docs/](https://localhost:4443/docs/)
+   - Raw spec: [https://localhost:4443/swagger.json](https://localhost:4443/swagger.json)
 
 _For more details, see the sections below._
 
@@ -204,7 +205,7 @@ Then we use cURL to send HTTP requests
 curl -X POST -k https://localhost:4443/v1/greeter -d '{"name": "TestName"}'
 ```
 
-You can view the swagger at [https://localhost:4443/swagger.json](https://localhost:4443/swagger.json)
+You can view the interactive docs at [https://localhost:4443/docs/](https://localhost:4443/docs/) or the raw swagger at [https://localhost:4443/swagger.json](https://localhost:4443/swagger.json)
 
 Or use the client:
 With the server running, you can test command line tools from `cmd`.
@@ -284,7 +285,15 @@ View the `genrule` in [BUILD.bazel](services/helloworld/BUILD.bazel)
 var Data []byte
 ```
 
-Services can then expose the `swagger.json` file directly.
+Services can then expose the `swagger.json` file and an interactive docs UI:
+
+```go
+openapi.Mount(mux, Data, "Helloworld API")
+```
+
+`pkg/openapi` serves Scalar API Reference at `/docs/` (CDN-backed, pinned jsDelivr
+build) pointed at your embedded spec. `/docs` redirects to `/docs/`. The CDN keeps
+binaries small; air-gapped deployments should vendor Scalar assets instead.
 
 ## Deployment
 

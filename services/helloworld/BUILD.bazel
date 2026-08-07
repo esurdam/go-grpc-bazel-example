@@ -29,6 +29,7 @@ go_library(
     deps = [
         "//pb/helloworld:helloworld_gateway_proto",  # keep
         "//pkg/helloworld/server",
+        "//pkg/openapi",
         "@com_github_philip_bui_grpc_zerolog//:grpc-zerolog",
         "@grpc_ecosystem_grpc_gateway//runtime",
         "@org_golang_google_grpc//:grpc",
