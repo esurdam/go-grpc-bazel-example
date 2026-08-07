@@ -14,7 +14,10 @@ proto_library(
     name = "helloworld_proto",
     srcs = ["helloworld.proto"],
     visibility = ["//visibility:public"],
-    deps = ["@googleapis//google/api:annotations_proto"],
+    deps = [
+        "@googleapis//google/api:annotations_proto",
+        "@grpc_ecosystem_grpc_gateway//protoc-gen-openapiv2/options:options_proto",
+    ],
 )
 
 # This is used for packages that do not require gateway; like cmd/client
@@ -24,7 +27,10 @@ go_proto_library(
     importpath = "github.com/esurdam/go-grpc-bazel-example/pb/helloworld",
     proto = ":helloworld_proto",
     visibility = ["//visibility:public"],
-    deps = ["@org_golang_google_genproto_googleapis_api//annotations"],
+    deps = [
+        "@grpc_ecosystem_grpc_gateway//protoc-gen-openapiv2/options:options_go_proto",
+        "@org_golang_google_genproto_googleapis_api//annotations",
+    ],
 )
 
 # This is used for packages that require gateway; like services/helloworld
@@ -34,13 +40,18 @@ gateway_grpc_library(
     protos = [":helloworld_proto"],
     visibility = ["//visibility:public"],
     deps = [
+        "@grpc_ecosystem_grpc_gateway//protoc-gen-openapiv2/options:options_go_proto",
         "@org_golang_google_genproto_googleapis_api//annotations",
     ],
 )
 
-# This outputs a swagger.json file that can be served by the gateway
+# This outputs a swagger.json file that can be served by the gateway.
+# simple naming yields HelloRequest/HelloReply instead of helloworldHelloRequest.
 gateway_openapiv2_compile(
     name = "helloworld_openapi_swagger",
+    options = {
+        "*": ["openapi_naming_strategy=simple"],
+    },
     protos = [":helloworld_proto"],
     visibility = ["//visibility:public"],
 )
