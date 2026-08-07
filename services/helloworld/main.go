@@ -1,4 +1,4 @@
-// Program main is the entrypoint to our helloworld GreeterServer
+// Program main is the entrypoint to our helloworld GreeterServer.
 package main
 
 import (
@@ -35,74 +35,58 @@ var (
 	insecure  = flag.Bool("insecure", false, "enable insecure tls skip verify for grpc-gateway")
 )
 
-type serverConfig struct {
-	httpPort int
-	cert     string
-	key      string
-	ca       string
-	insecure bool
-	swagger  []byte
-}
-
-func grpcHandlerFunc(grpcServer *grpc.Server, httpServer http.Handler) http.Handler {
+// grpcHandlerFunc routes HTTP/2 gRPC to the gRPC server and everything else
+// to the HTTP handler (gateway, healthz, docs).
+func grpcHandlerFunc(grpcServer *grpc.Server, other http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
 			grpcServer.ServeHTTP(w, r)
-		} else {
-			httpServer.ServeHTTP(w, r)
+			return
 		}
+		other.ServeHTTP(w, r)
 	})
 }
 
-func applyEnvFallbacks(cert, key, ca *string) {
-	if *cert == "" {
-		*cert = os.Getenv("SSL_CERT_PATH")
-	}
-	if *key == "" {
-		*key = os.Getenv("SSL_KEY_PATH")
-	}
-	if *ca == "" {
-		*ca = os.Getenv("SSL_CA_CERT_PATH")
-	}
-	// In this example, the generated cert contains the CA.
-	// In a production environment, the CA cert should be separate.
-	if *ca == "" {
-		*ca = *cert
-	}
-}
+func main() {
+	flag.Parse()
 
-func loadRootCAs(caPath string) (*x509.CertPool, error) {
-	rootCAs, err := x509.SystemCertPool()
-	if err != nil {
-		return nil, fmt.Errorf("system cert pool: %w", err)
+	if *sslCert == "" {
+		*sslCert = os.Getenv("SSL_CERT_PATH")
 	}
-	if rootCAs == nil {
+	if *sslKey == "" {
+		*sslKey = os.Getenv("SSL_KEY_PATH")
+	}
+	if *sslCACert == "" {
+		*sslCACert = os.Getenv("SSL_CA_CERT_PATH")
+	}
+	// In this example the generated cert contains the CA; production should
+	// keep the CA separate.
+	if *sslCACert == "" {
+		*sslCACert = *sslCert
+	}
+
+	pair, err := tls.LoadX509KeyPair(*sslCert, *sslKey)
+	if err != nil {
+		log.Fatalf("unable to load ssl cert or key: %v", err)
+	}
+
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil || rootCAs == nil {
 		rootCAs = x509.NewCertPool()
 	}
-	if caPath == "" {
-		return rootCAs, nil
+	if *sslCACert != "" {
+		pemBlock, err := os.ReadFile(*sslCACert)
+		if err != nil {
+			log.Fatalf("unable to read ca cert: %v", err)
+		}
+		if !rootCAs.AppendCertsFromPEM(pemBlock) {
+			log.Fatal("unable to append ca certs from PEM")
+		}
 	}
-	certPEMBlock, err := os.ReadFile(caPath)
-	if err != nil {
-		return nil, fmt.Errorf("read ca cert %q: %w", caPath, err)
-	}
-	if !rootCAs.AppendCertsFromPEM(certPEMBlock) {
-		return nil, fmt.Errorf("append ca certs from PEM: bad certs")
-	}
-	return rootCAs, nil
-}
 
-func tlsServerName(hostPort string) string {
-	host, _, err := net.SplitHostPort(hostPort)
-	if err != nil {
-		return hostPort
-	}
-	return host
-}
+	addr := fmt.Sprintf("localhost:%d", *httpPort)
 
-// newMux builds the HTTP/gRPC multiplexed handler. TLS is terminated by
-// http.Server; do not attach grpc.Creds when using ServeHTTP.
-func newMux(ctx context.Context, dialAddr string, rootCAs *x509.CertPool, skipVerify bool, swagger []byte) (http.Handler, *grpc.Server, error) {
+	// TLS is terminated by http.Server; do not attach grpc.Creds when using ServeHTTP.
 	grpcServer := grpc.NewServer(zerolog.UnaryInterceptor())
 	pb.RegisterGreeterServer(grpcServer, &server.Server{})
 
@@ -111,17 +95,21 @@ func newMux(ctx context.Context, dialAddr string, rootCAs *x509.CertPool, skipVe
 	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus(pb.Greeter_ServiceDesc.ServiceName, healthpb.HealthCheckResponse_SERVING)
 
-	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName:         tlsServerName(dialAddr),
-		RootCAs:            rootCAs,
-		InsecureSkipVerify: skipVerify,
-		MinVersion:         tls.VersionTLS12,
-	})
+	// Gateway dial lifecycle is independent of the shutdown signal so
+	// http.Server.Shutdown can drain in-flight REST requests first.
+	gwCtx, gwCancel := context.WithCancel(context.Background())
+	defer gwCancel()
+
 	gwmux := runtime.NewServeMux()
-	if err := pb.RegisterGreeterHandlerFromEndpoint(ctx, gwmux, dialAddr, []grpc.DialOption{
-		grpc.WithTransportCredentials(dcreds),
+	if err := pb.RegisterGreeterHandlerFromEndpoint(gwCtx, gwmux, addr, []grpc.DialOption{
+		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			ServerName:         "localhost",
+			RootCAs:            rootCAs,
+			InsecureSkipVerify: *insecure,
+			MinVersion:         tls.VersionTLS12,
+		})),
 	}); err != nil {
-		return nil, nil, fmt.Errorf("register gateway: %w", err)
+		log.Fatalf("failed to register gateway: %v", err)
 	}
 
 	mux := http.NewServeMux()
@@ -129,44 +117,17 @@ func newMux(ctx context.Context, dialAddr string, rootCAs *x509.CertPool, skipVe
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
-	openapi.Mount(mux, swagger, "Helloworld API")
+	openapi.Mount(mux, Data, "Helloworld API")
 	mux.Handle("/", gwmux)
 
-	return grpcHandlerFunc(grpcServer, mux), grpcServer, nil
-}
-
-// run starts the TLS multiplexed server and blocks until ctx is canceled,
-// then drains in-flight requests via http.Server.Shutdown.
-func run(ctx context.Context, cfg serverConfig) error {
-	pair, err := tls.LoadX509KeyPair(cfg.cert, cfg.key)
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", *httpPort))
 	if err != nil {
-		return fmt.Errorf("unable to load ssl cert or key -- required: %w", err)
+		log.Fatalf("unable to listen on tcp port %d: %v", *httpPort, err)
 	}
 
-	rootCAs, err := loadRootCAs(cfg.ca)
-	if err != nil {
-		return fmt.Errorf("unable to load ca certs: %w", err)
-	}
-
-	// Gateway dial lifecycle is independent of the shutdown signal so
-	// http.Server.Shutdown can drain in-flight REST requests first.
-	muxCtx, muxCancel := context.WithCancel(context.Background())
-	defer muxCancel()
-
-	addr := fmt.Sprintf("localhost:%d", cfg.httpPort)
-	handler, _, err := newMux(muxCtx, addr, rootCAs, cfg.insecure, cfg.swagger)
-	if err != nil {
-		return err
-	}
-
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.httpPort))
-	if err != nil {
-		return fmt.Errorf("unable to listen on tcp port %d: %w", cfg.httpPort, err)
-	}
-
-	gwServer := &http.Server{
+	srv := &http.Server{
 		Addr:              addr,
-		Handler:           handler,
+		Handler:           grpcHandlerFunc(grpcServer, mux),
 		ReadHeaderTimeout: 10 * time.Second,
 		TLSConfig: &tls.Config{
 			Certificates: []tls.Certificate{pair},
@@ -176,55 +137,23 @@ func run(ctx context.Context, cfg serverConfig) error {
 		},
 	}
 
-	errCh := make(chan error, 1)
-	go func() {
-		log.Printf("serving at https://%s\n", addr)
-		if err := gwServer.Serve(tls.NewListener(ln, gwServer.TLSConfig)); err != nil && err != http.ErrServerClosed {
-			errCh <- err
-			return
-		}
-		errCh <- nil
-	}()
-
-	select {
-	case <-ctx.Done():
-	case err := <-errCh:
-		if err != nil {
-			_ = ln.Close()
-			return err
-		}
-	}
-
-	shutdownCtx, cancelClose := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelClose()
-	if err := gwServer.Shutdown(shutdownCtx); err != nil {
-		return fmt.Errorf("server forced to shutdown: %w", err)
-	}
-	return <-errCh
-}
-
-var notifyContext = signal.NotifyContext
-
-func main() {
-	if err := mainErr(Data); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("server exiting")
-}
-
-func mainErr(swagger []byte) error {
-	flag.Parse()
-	applyEnvFallbacks(sslCert, sslKey, sslCACert)
-
-	ctx, stop := notifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	return run(ctx, serverConfig{
-		httpPort: *httpPort,
-		cert:     *sslCert,
-		key:      *sslKey,
-		ca:       *sslCACert,
-		insecure: *insecure,
-		swagger:  swagger,
-	})
+	go func() {
+		log.Printf("serving at https://%s", addr)
+		if err := srv.Serve(tls.NewListener(ln, srv.TLSConfig)); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %v", err)
+		}
+	}()
+
+	<-ctx.Done()
+	log.Println("shutting down server...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Fatal("server forced to shutdown:", err)
+	}
+	log.Println("server exiting")
 }
