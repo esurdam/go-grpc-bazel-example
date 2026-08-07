@@ -4,12 +4,10 @@ metadata:
   name: helloworld-service
   labels:
     app: helloworld
-  annotations:
-    prometheus.io/port: '10824'
-    prometheus.io/scrape: 'true'
 spec:
   ports:
     - port: 443
       name: mux
+      targetPort: mux
   selector:
     app: helloworld
